@@ -3,11 +3,14 @@
 
 use bevy::prelude::*;
 
+mod particles; use particles::*;
+
 fn main()
 {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup_camera)
+        .add_plugins(ParticleSystem)
         .run();
 }
 
