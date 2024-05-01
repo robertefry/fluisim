@@ -11,7 +11,7 @@ pub(crate) struct ParticleSystem;
 impl ParticleSystem
 {
     pub(crate) const PARTICLE_RADIUS: ClosedInterval<f32> = ClosedInterval::new(1.0, 100.0);
-    pub(crate) const COLLISION_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
+    pub(crate) const BORDER_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
     pub(crate) const GRAVITY: ClosedInterval<f32> = ClosedInterval::new(0.0, 20.0);
     pub(crate) const FORCE_MULTIPLIER: ClosedInterval<f32> = ClosedInterval::new(0.0, 100.0);
 }
@@ -89,13 +89,13 @@ impl ParticleSystem
                 transformation.translation.x <= bounds_min_x ||
                 transformation.translation.x >= bounds_max_x
             {
-                particle.velocity.x *= -1.0 * (1.0 - particle_resources.collision_damping);
+                particle.velocity.x *= -1.0 * (1.0 - particle_resources.border_damping);
             }
             if
                 transformation.translation.y <= bounds_min_y ||
                 transformation.translation.y >= bounds_max_y
             {
-                particle.velocity.y *= -1.0 * (1.0 - particle_resources.collision_damping);
+                particle.velocity.y *= -1.0 * (1.0 - particle_resources.border_damping);
             }
 
             // clamp the particles position inside the window
@@ -125,7 +125,7 @@ impl ParticleSystem
 pub(crate) struct ParticleResources
 {
     pub radius: f32,
-    pub collision_damping: f32,
+    pub border_damping: f32,
     pub gravity: f32,
     pub force_multiplier: f32,
 }
@@ -137,7 +137,7 @@ impl Default for ParticleResources
         ParticleResources
         {
             radius: ParticleSystem::PARTICLE_RADIUS.denormalise(0.1919191919191919),
-            collision_damping: ParticleSystem::COLLISION_DAMPING.lower_bound(),
+            border_damping: ParticleSystem::BORDER_DAMPING.lower_bound(),
             gravity: 9.8,
             force_multiplier: 32.0,
         }

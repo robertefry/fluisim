@@ -39,10 +39,10 @@ impl UiSystem
                     ).ui(ui);
                 ui.end_row();
 
-                ui.label("Collision Damping:");
+                ui.label("Border Damping:");
                 egui::Slider::new(
-                    &mut particle_resources.collision_damping,
-                    ParticleSystem::COLLISION_DAMPING.into()
+                    &mut particle_resources.border_damping,
+                    ParticleSystem::BORDER_DAMPING.into()
                     ).ui(ui);
                 ui.end_row();
 
