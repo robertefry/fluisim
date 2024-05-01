@@ -33,19 +33,31 @@ impl UiSystem
             egui::Grid::new("Particle Settings").show(ui, |ui|
             {
                 ui.label("Particle Radius:");
-                egui::Slider::new(&mut particle_resources.radius, Particle::RADIUS.into()).ui(ui);
+                egui::Slider::new(
+                    &mut particle_resources.radius,
+                    ParticleSystem::PARTICLE_RADIUS.into()
+                    ).ui(ui);
                 ui.end_row();
 
                 ui.label("Collision Damping:");
-                egui::Slider::new(&mut particle_resources.collision_damping, Particle::COLLISION_DAMPING.into()).ui(ui);
+                egui::Slider::new(
+                    &mut particle_resources.collision_damping,
+                    ParticleSystem::COLLISION_DAMPING.into()
+                    ).ui(ui);
                 ui.end_row();
 
                 ui.label("Gravity:");
-                egui::Slider::new(&mut particle_resources.gravity, Particle::GRAVITY.into()).ui(ui);
+                egui::Slider::new(
+                    &mut particle_resources.gravity,
+                    ParticleSystem::GRAVITY.into()
+                    ).ui(ui);
                 ui.end_row();
 
                 ui.label("Force Multiplier:");
-                egui::Slider::new(&mut particle_resources.force_multiplier, Particle::FORCE_MULTIPLIER.into()).ui(ui);
+                egui::Slider::new(
+                    &mut particle_resources.force_multiplier,
+                    ParticleSystem::FORCE_MULTIPLIER.into()
+                    ).ui(ui);
                 ui.end_row();
             });
         });

@@ -4,18 +4,18 @@
 use bevy::prelude::*;
 
 mod util;
-mod particles;
+mod simulation;
 mod ui;
 
-use particles::*;
+use simulation::*;
 use ui::*;
 
 fn main()
 {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(UiSystem)
         .add_systems(Startup, setup_camera)
+        .add_plugins(UiSystem)
         .add_plugins(ParticleSystem)
         .run();
 }

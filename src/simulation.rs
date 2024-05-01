@@ -8,6 +8,14 @@ use crate::util::*;
 #[derive(Component)]
 pub(crate) struct ParticleSystem;
 
+impl ParticleSystem
+{
+    pub(crate) const PARTICLE_RADIUS: ClosedInterval<f32> = ClosedInterval::new(1.0, 100.0);
+    pub(crate) const COLLISION_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
+    pub(crate) const GRAVITY: ClosedInterval<f32> = ClosedInterval::new(0.0, 20.0);
+    pub(crate) const FORCE_MULTIPLIER: ClosedInterval<f32> = ClosedInterval::new(0.0, 100.0);
+}
+
 impl Plugin for ParticleSystem
 {
     fn build(&self, app: &mut App)
@@ -32,7 +40,7 @@ impl ParticleSystem
         mut materials: ResMut<Assets<ColorMaterial>>,
         particle_resources: Res<ParticleResources>,
     ){
-        let particle_mesh: Mesh = Circle::new(Particle::RADIUS.upper_bound()).into();
+        let particle_mesh: Mesh = Circle::new(ParticleSystem::PARTICLE_RADIUS.upper_bound()).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
         let particle_scale = particle_resources.scale();
 
@@ -128,8 +136,8 @@ impl Default for ParticleResources
     {
         ParticleResources
         {
-            radius: Particle::RADIUS.denormalise(0.1919191919191919),
-            collision_damping: Particle::COLLISION_DAMPING.lower_bound(),
+            radius: ParticleSystem::PARTICLE_RADIUS.denormalise(0.1919191919191919),
+            collision_damping: ParticleSystem::COLLISION_DAMPING.lower_bound(),
             gravity: 9.8,
             force_multiplier: 1.0,
         }
@@ -140,7 +148,7 @@ impl ParticleResources
 {
     pub(crate) fn scale(&self) -> Vec3
     {
-        let scale = self.radius / Particle::RADIUS.upper_bound();
+        let scale = self.radius / ParticleSystem::PARTICLE_RADIUS.upper_bound();
         Vec3::new(scale, scale, scale)
     }
 }
@@ -149,12 +157,4 @@ impl ParticleResources
 pub(crate) struct Particle
 {
     velocity: Vec3,
-}
-
-impl Particle
-{
-    pub(crate) const RADIUS: ClosedInterval<f32> = ClosedInterval::new(1.0, 100.0);
-    pub(crate) const COLLISION_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
-    pub(crate) const GRAVITY: ClosedInterval<f32> = ClosedInterval::new(0.0, 20.0);
-    pub(crate) const FORCE_MULTIPLIER: ClosedInterval<f32> = ClosedInterval::new(0.0, 100.0);
 }
