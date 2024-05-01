@@ -100,14 +100,15 @@ impl ParticleSystem
 
     fn on_gravity(
         mut particles: Query<&mut Particle>,
+        particle_resources: Res<ParticleResources>,
         time: Res<Time>
     ){
-        const GRAVITY: Vec3 = Vec3::new(0.0, -9.8, 0.0);
-        const GRAVITY_MULTIPLIER: f32 = 32.0;
+        let gravity = -1.0 * particle_resources.gravity * particle_resources.force_multiplier;
+        let gravity_vector = Vec3::new(0.0, gravity, 0.0);
 
         for mut particle in particles.iter_mut()
         {
-            particle.velocity += GRAVITY * GRAVITY_MULTIPLIER * time.delta_seconds();
+            particle.velocity += gravity_vector * time.delta_seconds();
         }
     }
 }
@@ -117,6 +118,8 @@ pub(crate) struct ParticleResources
 {
     pub radius: f32,
     pub collision_damping: f32,
+    pub gravity: f32,
+    pub force_multiplier: f32,
 }
 
 impl Default for ParticleResources
@@ -127,6 +130,8 @@ impl Default for ParticleResources
         {
             radius: Particle::RADIUS.denormalise(0.1919191919191919),
             collision_damping: Particle::COLLISION_DAMPING.lower_bound(),
+            gravity: 9.8,
+            force_multiplier: 1.0,
         }
     }
 }
@@ -150,4 +155,6 @@ impl Particle
 {
     pub(crate) const RADIUS: ClosedInterval<f32> = ClosedInterval::new(1.0, 100.0);
     pub(crate) const COLLISION_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
+    pub(crate) const GRAVITY: ClosedInterval<f32> = ClosedInterval::new(0.0, 20.0);
+    pub(crate) const FORCE_MULTIPLIER: ClosedInterval<f32> = ClosedInterval::new(0.0, 100.0);
 }

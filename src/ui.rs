@@ -39,6 +39,14 @@ impl UiSystem
                 ui.label("Collision Damping:");
                 egui::Slider::new(&mut particle_resources.collision_damping, Particle::COLLISION_DAMPING.into()).ui(ui);
                 ui.end_row();
+
+                ui.label("Gravity:");
+                egui::Slider::new(&mut particle_resources.gravity, Particle::GRAVITY.into()).ui(ui);
+                ui.end_row();
+
+                ui.label("Force Multiplier:");
+                egui::Slider::new(&mut particle_resources.force_multiplier, Particle::FORCE_MULTIPLIER.into()).ui(ui);
+                ui.end_row();
             });
         });
 
