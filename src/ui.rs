@@ -22,11 +22,11 @@ impl UiSystem
     fn redraw(
         mut contexts: EguiContexts,
         mut particle_transforms: Query<&mut Transform, With<Particle>>,
-        mut particle_radius: ResMut<ParticleRadius>,
+        mut particle_resources: ResMut<ParticleResources>,
     ){
         let window = egui::Window::new("Settings");
 
-        let reference_particle_radius = particle_radius.radius;
+        let reference_particle_radius = particle_resources.radius;
 
         window.show(contexts.ctx_mut(), |ui|
         {
@@ -34,17 +34,21 @@ impl UiSystem
             {
                 let radius_range = Particle::RADIUS_MIN..=Particle::RADIUS_MAX;
 
-                ui.label("Radius:");
-                egui::Slider::new(&mut particle_radius.radius, radius_range).ui(ui);
+                ui.label("Particle Radius:");
+                egui::Slider::new(&mut particle_resources.radius, radius_range).ui(ui);
+                ui.end_row();
+
+                ui.label("Collision Damping:");
+                egui::Slider::new(&mut particle_resources.collision_damping, 0.0..=1.0).ui(ui);
                 ui.end_row();
             });
         });
 
-        if reference_particle_radius != particle_radius.radius
+        if reference_particle_radius != particle_resources.radius
         {
             for mut particle_transform in particle_transforms.iter_mut()
             {
-                particle_transform.scale = particle_radius.to_scale();
+                particle_transform.scale = particle_resources.scale();
             }
         }
     }

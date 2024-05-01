@@ -18,7 +18,7 @@ impl Plugin for ParticleSystem
             ParticleSystem::confine_to_window,
         ).chain());
 
-        app.init_resource::<ParticleRadius>();
+        app.init_resource::<ParticleResources>();
     }
 }
 
@@ -28,9 +28,9 @@ impl ParticleSystem
         mut commands: Commands,
         mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<ColorMaterial>>,
-        particle_radius: Res<ParticleRadius>,
+        particle_resources: Res<ParticleResources>,
     ){
-        let particle_mesh: Mesh = Circle::new(particle_radius.radius).into();
+        let particle_mesh: Mesh = Circle::new(particle_resources.radius).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
 
         commands.spawn(
@@ -61,14 +61,14 @@ impl ParticleSystem
     fn confine_to_window(
         mut particles: Query<(&mut Transform, &mut Particle)>,
         window_query: Query<&Window, With<PrimaryWindow>>,
-        particle_radius: Res<ParticleRadius>,
+        particle_resources: Res<ParticleResources>,
     ){
         let window = window_query.get_single().unwrap();
 
-        let bounds_min_x = -window.width()  / 2.0 + particle_radius.radius;
-        let bounds_max_x =  window.width()  / 2.0 - particle_radius.radius;
-        let bounds_min_y = -window.height() / 2.0 + particle_radius.radius;
-        let bounds_max_y =  window.height() / 2.0 - particle_radius.radius;
+        let bounds_min_x = -window.width()  / 2.0 + particle_resources.radius;
+        let bounds_max_x =  window.width()  / 2.0 - particle_resources.radius;
+        let bounds_min_y = -window.height() / 2.0 + particle_resources.radius;
+        let bounds_max_y =  window.height() / 2.0 - particle_resources.radius;
 
         for (mut transformation, mut particle) in particles.iter_mut()
         {
@@ -77,13 +77,13 @@ impl ParticleSystem
                 transformation.translation.x <= bounds_min_x ||
                 transformation.translation.x >= bounds_max_x
             {
-                particle.velocity.x *= -1.0 * Particle::COLLISION_DAMPING;
+                particle.velocity.x *= -1.0 * (1.0 - particle_resources.collision_damping);
             }
             if
                 transformation.translation.y <= bounds_min_y ||
                 transformation.translation.y >= bounds_max_y
             {
-                particle.velocity.y *= -1.0 * Particle::COLLISION_DAMPING;
+                particle.velocity.y *= -1.0 * (1.0 - particle_resources.collision_damping);
             }
 
             // clamp the particles position inside the window
@@ -109,23 +109,29 @@ impl ParticleSystem
 }
 
 #[derive(Resource)]
-pub(crate) struct ParticleRadius
+pub(crate) struct ParticleResources
 {
     pub radius: f32,
+    pub collision_damping: f32,
 }
 
-impl Default for ParticleRadius
+impl Default for ParticleResources
 {
     fn default() -> Self
     {
         let radius_range = Particle::RADIUS_MAX - Particle::RADIUS_MIN;
-        ParticleRadius{ radius: Particle::RADIUS_MIN + radius_range / 2.0 }
+
+        ParticleResources
+        {
+            radius: Particle::RADIUS_MIN + radius_range / 2.0,
+            collision_damping: 0.0,
+        }
     }
 }
 
-impl ParticleRadius
+impl ParticleResources
 {
-    pub fn to_scale(&self) -> Vec3
+    pub fn scale(&self) -> Vec3
     {
         let radius_offset = self.radius - Particle::RADIUS_MIN;
         let radius_range = Particle::RADIUS_MAX - Particle::RADIUS_MIN;
@@ -143,9 +149,6 @@ pub(crate) struct Particle
 
 impl Particle
 {
-    // The percentage of kinetic energy retained on collisions.
-    const COLLISION_DAMPING: f32 = 0.9;
-
     pub const RADIUS_MIN: f32 = 1.0;
     pub const RADIUS_MAX: f32 = 100.0;
 }
