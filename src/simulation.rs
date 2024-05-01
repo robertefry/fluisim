@@ -139,7 +139,7 @@ impl Default for ParticleResources
             radius: ParticleSystem::PARTICLE_RADIUS.denormalise(0.1919191919191919),
             collision_damping: ParticleSystem::COLLISION_DAMPING.lower_bound(),
             gravity: 9.8,
-            force_multiplier: 1.0,
+            force_multiplier: 32.0,
         }
     }
 }
