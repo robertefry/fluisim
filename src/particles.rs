@@ -17,6 +17,8 @@ impl Plugin for ParticleSystem
             ParticleSystem::movement,
             ParticleSystem::confine_to_window,
         ).chain());
+
+        app.init_resource::<ParticleRadius>();
     }
 }
 
@@ -26,8 +28,9 @@ impl ParticleSystem
         mut commands: Commands,
         mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<ColorMaterial>>,
+        particle_radius: Res<ParticleRadius>,
     ){
-        let particle_mesh: Mesh = Circle::new(50.0).into();
+        let particle_mesh: Mesh = Circle::new(particle_radius.radius).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
 
         commands.spawn(
@@ -58,13 +61,14 @@ impl ParticleSystem
     fn confine_to_window(
         mut particles: Query<(&mut Transform, &mut Particle)>,
         window_query: Query<&Window, With<PrimaryWindow>>,
+        particle_radius: Res<ParticleRadius>,
     ){
         let window = window_query.get_single().unwrap();
 
-        let bounds_min_x = -window.width()  / 2.0 + Particle::RADIUS;
-        let bounds_max_x =  window.width()  / 2.0 - Particle::RADIUS;
-        let bounds_min_y = -window.height() / 2.0 + Particle::RADIUS;
-        let bounds_max_y =  window.height() / 2.0 - Particle::RADIUS;
+        let bounds_min_x = -window.width()  / 2.0 + particle_radius.radius;
+        let bounds_max_x =  window.width()  / 2.0 - particle_radius.radius;
+        let bounds_min_y = -window.height() / 2.0 + particle_radius.radius;
+        let bounds_max_y =  window.height() / 2.0 - particle_radius.radius;
 
         for (mut transformation, mut particle) in particles.iter_mut()
         {
@@ -104,16 +108,44 @@ impl ParticleSystem
     }
 }
 
+#[derive(Resource)]
+pub(crate) struct ParticleRadius
+{
+    pub radius: f32,
+}
+
+impl Default for ParticleRadius
+{
+    fn default() -> Self
+    {
+        let radius_range = Particle::RADIUS_MAX - Particle::RADIUS_MIN;
+        ParticleRadius{ radius: Particle::RADIUS_MIN + radius_range / 2.0 }
+    }
+}
+
+impl ParticleRadius
+{
+    pub fn to_scale(&self) -> Vec3
+    {
+        let radius_offset = self.radius - Particle::RADIUS_MIN;
+        let radius_range = Particle::RADIUS_MAX - Particle::RADIUS_MIN;
+        let scale = 2.0 * radius_offset / radius_range;
+
+        Vec3::new(scale, scale, scale)
+    }
+}
+
 #[derive(Component)]
-struct Particle
+pub(crate) struct Particle
 {
     velocity: Vec3,
 }
 
 impl Particle
 {
-    const RADIUS: f32 = 50.0;
-
     // The percentage of kinetic energy retained on collisions.
     const COLLISION_DAMPING: f32 = 0.9;
+
+    pub const RADIUS_MIN: f32 = 1.0;
+    pub const RADIUS_MAX: f32 = 100.0;
 }
