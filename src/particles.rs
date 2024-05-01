@@ -3,6 +3,8 @@ use bevy::prelude::*;
 use bevy::sprite::*;
 use bevy::window::*;
 
+use crate::util::*;
+
 #[derive(Component)]
 pub(crate) struct ParticleSystem;
 
@@ -30,8 +32,9 @@ impl ParticleSystem
         mut materials: ResMut<Assets<ColorMaterial>>,
         particle_resources: Res<ParticleResources>,
     ){
-        let particle_mesh: Mesh = Circle::new(particle_resources.radius).into();
+        let particle_mesh: Mesh = Circle::new(Particle::RADIUS.upper_bound()).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
+        let particle_scale = particle_resources.scale();
 
         commands.spawn(
         (
@@ -39,6 +42,7 @@ impl ParticleSystem
             {
                 mesh: meshes.add(particle_mesh).into(),
                 material: materials.add(particle_material).into(),
+                transform: Transform::from_scale(particle_scale),
                 ..default()
             },
             Particle
@@ -119,24 +123,19 @@ impl Default for ParticleResources
 {
     fn default() -> Self
     {
-        let radius_range = Particle::RADIUS_MAX - Particle::RADIUS_MIN;
-
         ParticleResources
         {
-            radius: Particle::RADIUS_MIN + radius_range / 2.0,
-            collision_damping: 0.0,
+            radius: Particle::RADIUS.denormalise(0.1919191919191919),
+            collision_damping: Particle::COLLISION_DAMPING.lower_bound(),
         }
     }
 }
 
 impl ParticleResources
 {
-    pub fn scale(&self) -> Vec3
+    pub(crate) fn scale(&self) -> Vec3
     {
-        let radius_offset = self.radius - Particle::RADIUS_MIN;
-        let radius_range = Particle::RADIUS_MAX - Particle::RADIUS_MIN;
-        let scale = 2.0 * radius_offset / radius_range;
-
+        let scale = self.radius / Particle::RADIUS.upper_bound();
         Vec3::new(scale, scale, scale)
     }
 }
@@ -149,6 +148,6 @@ pub(crate) struct Particle
 
 impl Particle
 {
-    pub const RADIUS_MIN: f32 = 1.0;
-    pub const RADIUS_MAX: f32 = 100.0;
+    pub(crate) const RADIUS: ClosedInterval<f32> = ClosedInterval::new(1.0, 100.0);
+    pub(crate) const COLLISION_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
 }

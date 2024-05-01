@@ -32,14 +32,12 @@ impl UiSystem
         {
             egui::Grid::new("Particle Settings").show(ui, |ui|
             {
-                let radius_range = Particle::RADIUS_MIN..=Particle::RADIUS_MAX;
-
                 ui.label("Particle Radius:");
-                egui::Slider::new(&mut particle_resources.radius, radius_range).ui(ui);
+                egui::Slider::new(&mut particle_resources.radius, Particle::RADIUS.into()).ui(ui);
                 ui.end_row();
 
                 ui.label("Collision Damping:");
-                egui::Slider::new(&mut particle_resources.collision_damping, 0.0..=1.0).ui(ui);
+                egui::Slider::new(&mut particle_resources.collision_damping, Particle::COLLISION_DAMPING.into()).ui(ui);
                 ui.end_row();
             });
         });

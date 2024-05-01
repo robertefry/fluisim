@@ -3,8 +3,12 @@
 
 use bevy::prelude::*;
 
-mod particles; use particles::*;
-mod ui; use ui::*;
+mod util;
+mod particles;
+mod ui;
+
+use particles::*;
+use ui::*;
 
 fn main()
 {
