@@ -1,4 +1,4 @@
 
 mod interval;
 
-pub use interval::*;
+pub(crate) use interval::*;

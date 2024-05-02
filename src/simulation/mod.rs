@@ -5,34 +5,34 @@ use bevy::window::*;
 
 use crate::util::*;
 
+mod resources;
+mod particles;
+mod settings;
+
+pub(crate) use resources::*;
+pub(crate) use particles::*;
+pub(crate) use settings::*;
+
 #[derive(Component)]
-pub(crate) struct ParticleSystem;
+pub(crate) struct Simulation;
 
-impl ParticleSystem
-{
-    pub(crate) const PARTICLE_RADIUS: ClosedInterval<f32> = ClosedInterval::new(1.0, 100.0);
-    pub(crate) const BORDER_DAMPING: ClosedInterval<f32> = ClosedInterval::new(0.0, 1.0);
-    pub(crate) const GRAVITY: ClosedInterval<f32> = ClosedInterval::new(0.0, 20.0);
-    pub(crate) const FORCE_MULTIPLIER: ClosedInterval<f32> = ClosedInterval::new(0.0, 100.0);
-}
-
-impl Plugin for ParticleSystem
+impl Plugin for Simulation
 {
     fn build(&self, app: &mut App)
     {
-        app.add_systems(Startup, ParticleSystem::setup);
+        app.add_systems(Startup, Simulation::setup);
 
         app.add_systems(Update, (
-            ParticleSystem::on_gravity,
-            ParticleSystem::movement,
-            ParticleSystem::confine_to_window,
+            Simulation::on_gravity,
+            Simulation::movement,
+            Simulation::confine_to_window,
         ).chain());
 
         app.init_resource::<ParticleResources>();
     }
 }
 
-impl ParticleSystem
+impl Simulation
 {
     fn setup(
         mut commands: Commands,
@@ -40,7 +40,7 @@ impl ParticleSystem
         mut materials: ResMut<Assets<ColorMaterial>>,
         particle_resources: Res<ParticleResources>,
     ){
-        let particle_mesh: Mesh = Circle::new(ParticleSystem::PARTICLE_RADIUS.upper_bound()).into();
+        let particle_mesh: Mesh = Circle::new(Settings::PARTICLE_RADIUS.upper_bound()).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
         let particle_scale = particle_resources.scale();
 
@@ -119,42 +119,4 @@ impl ParticleSystem
             particle.velocity += gravity_vector * time.delta_seconds();
         }
     }
-}
-
-#[derive(Resource)]
-pub(crate) struct ParticleResources
-{
-    pub radius: f32,
-    pub border_damping: f32,
-    pub gravity: f32,
-    pub force_multiplier: f32,
-}
-
-impl Default for ParticleResources
-{
-    fn default() -> Self
-    {
-        ParticleResources
-        {
-            radius: ParticleSystem::PARTICLE_RADIUS.denormalise(0.1919191919191919),
-            border_damping: ParticleSystem::BORDER_DAMPING.lower_bound(),
-            gravity: 9.8,
-            force_multiplier: 32.0,
-        }
-    }
-}
-
-impl ParticleResources
-{
-    pub(crate) fn scale(&self) -> Vec3
-    {
-        let scale = self.radius / ParticleSystem::PARTICLE_RADIUS.upper_bound();
-        Vec3::new(scale, scale, scale)
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct Particle
-{
-    velocity: Vec3,
 }

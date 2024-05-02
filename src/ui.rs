@@ -35,30 +35,32 @@ impl UiSystem
                 ui.label("Particle Radius:");
                 egui::Slider::new(
                     &mut particle_resources.radius,
-                    ParticleSystem::PARTICLE_RADIUS.into()
+                    Settings::PARTICLE_RADIUS.into()
                     ).ui(ui);
                 ui.end_row();
 
                 ui.label("Border Damping:");
                 egui::Slider::new(
                     &mut particle_resources.border_damping,
-                    ParticleSystem::BORDER_DAMPING.into()
+                    Settings::BORDER_DAMPING.into()
                     ).ui(ui);
                 ui.end_row();
 
                 ui.label("Gravity:");
                 egui::Slider::new(
                     &mut particle_resources.gravity,
-                    ParticleSystem::GRAVITY.into()
+                    Settings::GRAVITY.into()
                     ).ui(ui);
                 ui.end_row();
 
                 ui.label("Force Multiplier:");
                 egui::Slider::new(
                     &mut particle_resources.force_multiplier,
-                    ParticleSystem::FORCE_MULTIPLIER.into()
+                    Settings::FORCE_MULTIPLIER.into()
                     ).ui(ui);
                 ui.end_row();
+
+                ui.button("Start Simulation").clicked()
             });
         });
 
