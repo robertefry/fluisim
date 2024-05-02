@@ -28,7 +28,7 @@ impl Plugin for Simulation
             Simulation::confine_to_window,
         ).chain());
 
-        app.init_resource::<ParticleResources>();
+        app.init_resource::<SimulationResources>();
     }
 }
 
@@ -38,11 +38,11 @@ impl Simulation
         mut commands: Commands,
         mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<ColorMaterial>>,
-        particle_resources: Res<ParticleResources>,
+        simulation_resources: Res<SimulationResources>,
     ){
         let particle_mesh: Mesh = Circle::new(Settings::PARTICLE_RADIUS.upper_bound()).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
-        let particle_scale = particle_resources.scale();
+        let particle_scale = simulation_resources.particle_scale();
 
         commands.spawn(
         (
@@ -73,14 +73,14 @@ impl Simulation
     fn confine_to_window(
         mut particles: Query<(&mut Transform, &mut Particle)>,
         window_query: Query<&Window, With<PrimaryWindow>>,
-        particle_resources: Res<ParticleResources>,
+        simulation_resources: Res<SimulationResources>,
     ){
         let window = window_query.get_single().unwrap();
 
-        let bounds_min_x = -window.width()  / 2.0 + particle_resources.radius;
-        let bounds_max_x =  window.width()  / 2.0 - particle_resources.radius;
-        let bounds_min_y = -window.height() / 2.0 + particle_resources.radius;
-        let bounds_max_y =  window.height() / 2.0 - particle_resources.radius;
+        let bounds_min_x = -window.width()  / 2.0 + simulation_resources.particle_radius;
+        let bounds_max_x =  window.width()  / 2.0 - simulation_resources.particle_radius;
+        let bounds_min_y = -window.height() / 2.0 + simulation_resources.particle_radius;
+        let bounds_max_y =  window.height() / 2.0 - simulation_resources.particle_radius;
 
         for (mut transformation, mut particle) in particles.iter_mut()
         {
@@ -89,13 +89,13 @@ impl Simulation
                 transformation.translation.x <= bounds_min_x ||
                 transformation.translation.x >= bounds_max_x
             {
-                particle.velocity.x *= -1.0 * (1.0 - particle_resources.border_damping);
+                particle.velocity.x *= -1.0 * (1.0 - simulation_resources.border_damping);
             }
             if
                 transformation.translation.y <= bounds_min_y ||
                 transformation.translation.y >= bounds_max_y
             {
-                particle.velocity.y *= -1.0 * (1.0 - particle_resources.border_damping);
+                particle.velocity.y *= -1.0 * (1.0 - simulation_resources.border_damping);
             }
 
             // clamp the particles position inside the window
@@ -108,10 +108,10 @@ impl Simulation
 
     fn on_gravity(
         mut particles: Query<&mut Particle>,
-        particle_resources: Res<ParticleResources>,
+        simulation_resources: Res<SimulationResources>,
         time: Res<Time>
     ){
-        let gravity = -1.0 * particle_resources.gravity * particle_resources.force_multiplier;
+        let gravity = -1.0 * simulation_resources.gravity * simulation_resources.force_multiplier;
         let gravity_vector = Vec3::new(0.0, gravity, 0.0);
 
         for mut particle in particles.iter_mut()

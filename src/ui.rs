@@ -22,11 +22,11 @@ impl UiSystem
     fn redraw(
         mut contexts: EguiContexts,
         mut particle_transforms: Query<&mut Transform, With<Particle>>,
-        mut particle_resources: ResMut<ParticleResources>,
+        mut simulation_resources: ResMut<SimulationResources>,
     ){
         let window = egui::Window::new("Settings");
 
-        let reference_particle_radius = particle_resources.radius;
+        let reference_resources = simulation_resources.clone();
 
         window.show(contexts.ctx_mut(), |ui|
         {
@@ -34,28 +34,28 @@ impl UiSystem
             {
                 ui.label("Particle Radius:");
                 egui::Slider::new(
-                    &mut particle_resources.radius,
+                    &mut simulation_resources.particle_radius,
                     Settings::PARTICLE_RADIUS.into()
                     ).ui(ui);
                 ui.end_row();
 
                 ui.label("Border Damping:");
                 egui::Slider::new(
-                    &mut particle_resources.border_damping,
+                    &mut simulation_resources.border_damping,
                     Settings::BORDER_DAMPING.into()
                     ).ui(ui);
                 ui.end_row();
 
                 ui.label("Gravity:");
                 egui::Slider::new(
-                    &mut particle_resources.gravity,
+                    &mut simulation_resources.gravity,
                     Settings::GRAVITY.into()
                     ).ui(ui);
                 ui.end_row();
 
                 ui.label("Force Multiplier:");
                 egui::Slider::new(
-                    &mut particle_resources.force_multiplier,
+                    &mut simulation_resources.force_multiplier,
                     Settings::FORCE_MULTIPLIER.into()
                     ).ui(ui);
                 ui.end_row();
@@ -64,11 +64,11 @@ impl UiSystem
             });
         });
 
-        if reference_particle_radius != particle_resources.radius
+        if reference_resources.particle_radius != simulation_resources.particle_radius
         {
             for mut particle_transform in particle_transforms.iter_mut()
             {
-                particle_transform.scale = particle_resources.scale();
+                particle_transform.scale = simulation_resources.particle_scale();
             }
         }
     }
