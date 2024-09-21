@@ -6,7 +6,6 @@ use bevy_egui::egui::Widget;
 use crate::settings::*;
 use crate::particles::*;
 
-#[derive(Component)]
 pub(crate) struct UiSystem;
 
 impl Plugin for UiSystem

@@ -7,7 +7,6 @@ use crate::util::*;
 use crate::settings::*;
 use crate::particles::*;
 
-#[derive(Component)]
 pub(crate) struct Simulation;
 
 impl Plugin for Simulation
