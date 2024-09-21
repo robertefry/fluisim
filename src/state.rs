@@ -1,21 +1,8 @@
 
 use bevy::prelude::*;
 
-use crate::simulation::*;
-
-#[derive(States, Default, Debug, Clone, Eq, PartialEq, Hash)]
-pub(crate) enum States
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum SimStates
 {
     #[default] Running,
-}
-
-#[derive(Component)]
-pub(crate) struct StateManager;
-
-impl Plugin for StateManager
-{
-    fn build(&self, app: &mut App)
-    {
-        app.add_plugins(Simulation);
-    }
 }

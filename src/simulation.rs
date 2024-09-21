@@ -5,21 +5,32 @@ use bevy::window::*;
 
 use crate::util::*;
 use crate::settings::*;
+use crate::state::*;
 use crate::particles::*;
 
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct Simulation;
 
 impl Plugin for Simulation
 {
     fn build(&self, app: &mut App)
     {
-        app.add_systems(Startup, Simulation::setup);
+        app.configure_sets(Update, Simulation.run_if(in_state(SimStates::Running)));
 
-        app.add_systems(Update, (
-            Simulation::on_gravity,
-            Simulation::movement,
-            Simulation::confine_to_window,
-        ).chain());
+        app.add_systems(Startup,
+            (
+                Simulation::setup,
+            )
+            .in_set(Simulation));
+
+        app.add_systems(Update,
+            (
+                Simulation::on_gravity,
+                Simulation::movement,
+                Simulation::confine_to_window,
+            )
+            .chain()
+            .in_set(Simulation));
     }
 }
 
