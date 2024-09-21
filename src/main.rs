@@ -6,9 +6,11 @@ use bevy::prelude::*;
 mod util;
 mod simulation;
 mod ui;
+mod settings;
 
 use simulation::*;
 use ui::*;
+use settings::*;
 
 fn main()
 {
@@ -17,6 +19,7 @@ fn main()
         .add_systems(Startup, setup_camera)
         .add_plugins(Simulation)
         .add_plugins(UiSystem)
+        .init_resource::<Settings>()
         .run();
 }
 
