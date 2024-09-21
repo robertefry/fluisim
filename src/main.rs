@@ -7,19 +7,20 @@ mod util;
 
 mod ui;
 mod settings;
+mod state;
 mod simulation;
 mod particles;
 
 use ui::*;
 use settings::*;
-use simulation::*;
+use state::*;
 
 fn main()
 {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup_camera)
-        .add_plugins(Simulation)
+        .add_plugins(StateManager)
         .add_plugins(UiSystem)
         .init_resource::<Settings>()
         .run();

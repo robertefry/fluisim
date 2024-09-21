@@ -1,7 +1,7 @@
 
 use bevy::prelude::*;
 
-use crate::*;
+use crate::simulation::*;
 
 #[derive(States, Default, Debug, Clone, Eq, PartialEq, Hash)]
 pub(crate) enum States
