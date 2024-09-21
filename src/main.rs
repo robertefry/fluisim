@@ -4,13 +4,15 @@
 use bevy::prelude::*;
 
 mod util;
-mod simulation;
+
 mod ui;
 mod settings;
+mod simulation;
+mod particles;
 
-use simulation::*;
 use ui::*;
 use settings::*;
+use simulation::*;
 
 fn main()
 {

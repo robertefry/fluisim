@@ -4,10 +4,8 @@ use bevy::sprite::*;
 use bevy::window::*;
 
 use crate::util::*;
-use super::*;
-
-mod particles;
-pub(crate) use particles::*;
+use crate::settings::*;
+use crate::particles::*;
 
 #[derive(Component)]
 pub(crate) struct Simulation;

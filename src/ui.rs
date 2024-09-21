@@ -3,7 +3,8 @@ use bevy::prelude::*;
 use bevy_egui::*;
 use bevy_egui::egui::Widget;
 
-use crate::*;
+use crate::settings::*;
+use crate::particles::*;
 
 #[derive(Component)]
 pub(crate) struct UiSystem;
