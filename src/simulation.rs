@@ -57,7 +57,7 @@ impl Simulation
             },
             Particle
             {
-                velocity: Vec3::new(0.0, 0.0, 0.0),
+                velocity: Vec2::new(0.0, 0.0),
             },
         ));
     }
@@ -68,7 +68,8 @@ impl Simulation
     ){
         for (mut transform, particle) in particles.iter_mut()
         {
-            transform.translation += particle.velocity * time.delta_seconds();
+            let delta = particle.velocity * time.delta_seconds();
+            transform.translation += Vec3::new(delta.x, delta.y, 0.0);
         }
     }
 
@@ -114,7 +115,7 @@ impl Simulation
         time: Res<Time>
     ){
         let gravity = -1.0 * settings.gravity * settings.force_multiplier;
-        let gravity_vector = Vec3::new(0.0, gravity, 0.0);
+        let gravity_vector = Vec2::new(0.0, gravity);
 
         for mut particle in particles.iter_mut()
         {
