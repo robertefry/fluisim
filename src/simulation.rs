@@ -6,7 +6,7 @@ use bevy::window::*;
 use crate::util::*;
 use crate::settings::*;
 use crate::state::*;
-use crate::particles::*;
+use crate::particle::*;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct Simulation;

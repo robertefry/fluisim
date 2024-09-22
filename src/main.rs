@@ -9,7 +9,7 @@ mod ui;
 mod settings;
 mod state;
 mod simulation;
-mod particles;
+mod particle;
 
 use ui::*;
 use settings::*;

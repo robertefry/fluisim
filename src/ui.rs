@@ -4,7 +4,7 @@ use bevy_egui::*;
 use bevy_egui::egui::Widget;
 
 use crate::settings::*;
-use crate::particles::*;
+use crate::particle::*;
 
 pub(crate) struct UiSystem;
 
