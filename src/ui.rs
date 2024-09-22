@@ -37,11 +37,23 @@ impl UiSystem
                     ui.set_enabled(false);
                 }
 
+                ui.label("Particle Count:");
+                let slider_particle_count = egui::DragValue::new(
+                    &mut settings.particle_count)
+                    .clamp_range(Settings::PARTICLE_COUNT.into())
+                    .ui(ui);
+                ui.end_row();
+
+                if slider_particle_count.changed()
+                {
+                    event_writer.send(SettingsChangedEvent::ParticleCount);
+                }
+
                 ui.label("Particle Radius:");
                 let slider_particle_radius = egui::Slider::new(
                     &mut settings.particle_radius,
-                    Settings::PARTICLE_RADIUS.into(),
-                ).ui(ui);
+                    Settings::PARTICLE_RADIUS.into())
+                    .ui(ui);
                 ui.end_row();
 
                 if slider_particle_radius.changed()
@@ -52,8 +64,8 @@ impl UiSystem
                 ui.label("Border Damping:");
                 let slider_border_damping = egui::Slider::new(
                     &mut settings.border_damping,
-                    Settings::BORDER_DAMPING.into(),
-                ).ui(ui);
+                    Settings::BORDER_DAMPING.into())
+                    .ui(ui);
                 ui.end_row();
 
                 if slider_border_damping.changed()
@@ -64,8 +76,8 @@ impl UiSystem
                 ui.label("Gravity:");
                 let slider_gravity = egui::Slider::new(
                     &mut settings.gravity,
-                    Settings::GRAVITY.into(),
-                ).ui(ui);
+                    Settings::GRAVITY.into())
+                    .ui(ui);
                 ui.end_row();
 
                 if slider_gravity.changed()
@@ -76,8 +88,8 @@ impl UiSystem
                 ui.label("Force Multiplier:");
                 let slider_force_multiplier = egui::Slider::new(
                     &mut settings.force_multiplier,
-                    Settings::FORCE_MULTIPLIER.into(),
-                ).ui(ui);
+                    Settings::FORCE_MULTIPLIER.into())
+                    .ui(ui);
                 ui.end_row();
 
                 if slider_force_multiplier.changed()

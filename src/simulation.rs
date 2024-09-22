@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use bevy::sprite::*;
 use bevy::window::*;
 
-use crate::util::*;
 use crate::settings::*;
 use crate::state::*;
 use crate::particle::*;
@@ -16,7 +15,14 @@ impl Plugin for Simulation
     {
         app.add_plugins(ParticleSystem);
 
-        app.add_systems(Startup, Simulation::setup);
+        app.add_systems(Startup, Simulation::spawn_initial_particles.after(ParticleSystemSet));
+
+        app.configure_sets(Update, SimState::Configure.run_if(in_state(SimState::Configure)));
+        app.add_systems(Update,
+            (
+                Simulation::on_particle_count_changed,
+            )
+            .in_set(SimState::Configure));
 
         app.configure_sets(Update, SimState::Running.run_if(in_state(SimState::Running)));
         app.add_systems(Update,
@@ -32,23 +38,17 @@ impl Plugin for Simulation
 
 impl Simulation
 {
-    fn setup(
+    fn spawn_initial_particles(
         mut commands: Commands,
-        mut meshes: ResMut<Assets<Mesh>>,
-        mut materials: ResMut<Assets<ColorMaterial>>,
+        particle_resources: Res<ParticleResources>,
         settings: Res<Settings>,
     ){
-        let particle_mesh: Mesh = Circle::new(Settings::PARTICLE_RADIUS.upper_bound()).into();
-        let particle_material = ColorMaterial::from(Color::CYAN);
-        let particle_scale = settings.particle_scale();
-
-        commands.spawn(
-        (
+        commands.spawn((
             MaterialMesh2dBundle
             {
-                mesh: meshes.add(particle_mesh).into(),
-                material: materials.add(particle_material).into(),
-                transform: Transform::from_scale(particle_scale),
+                mesh: particle_resources.mesh.clone().into(),
+                material: particle_resources.material.clone(),
+                transform: Transform::from_scale(settings.particle_scale()),
                 ..default()
             },
             Particle
@@ -116,6 +116,46 @@ impl Simulation
         for mut particle in particles.iter_mut()
         {
             particle.velocity += gravity_vector * time.delta_seconds();
+        }
+    }
+
+    fn on_particle_count_changed(
+        mut commands: Commands,
+        particles: Query<Entity, With<Particle>>,
+        particle_resources: Res<ParticleResources>,
+        mut event_reader: EventReader<SettingsChangedEvent>,
+        settings: Res<Settings>,
+    ){
+        if let Some(_) = event_reader.read()
+            .filter(|e| matches!(e, SettingsChangedEvent::ParticleCount))
+            .last()
+        {
+            for entity in particles.iter()
+            {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            for i in 0..settings.particle_count
+            {
+                // todo: spawn particles in a grid
+                let shift = (i as f32) * 2.0 * settings.particle_radius + 2.0;
+                let transform = Transform::from_scale(settings.particle_scale())
+                    .with_translation(Vec3::new(shift, 0.0, 0.0));
+
+                commands.spawn((
+                    MaterialMesh2dBundle
+                    {
+                        mesh: particle_resources.mesh.clone().into(),
+                        material: particle_resources.material.clone(),
+                        transform,
+                        ..default()
+                    },
+                    Particle
+                    {
+                        velocity: Vec2::new(0.0, 0.0),
+                    },
+                ));
+            }
         }
     }
 }
