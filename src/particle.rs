@@ -21,7 +21,7 @@ impl Plugin for ParticleSystem
 
 impl ParticleSystem
 {
-    pub(crate) fn on_settings_changed(
+    fn on_settings_changed(
         mut event_reader: EventReader<SettingsChangedEvent>,
         mut particle_transforms: Query<&mut Transform, With<Particle>>,
         settings: ResMut<Settings>,
