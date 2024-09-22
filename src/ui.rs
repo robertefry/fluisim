@@ -4,7 +4,6 @@ use bevy_egui::*;
 use bevy_egui::egui::Widget;
 
 use crate::settings::*;
-use crate::particle::*;
 
 pub(crate) struct UiSystem;
 
@@ -21,7 +20,7 @@ impl UiSystem
 {
     fn redraw(
         mut contexts: EguiContexts,
-        mut particle_transforms: Query<&mut Transform, With<Particle>>,
+        mut event_writer: EventWriter<SettingsChangedEvent>,
         mut settings: ResMut<Settings>,
     ){
         let window = egui::Window::new("Settings");
@@ -66,10 +65,7 @@ impl UiSystem
 
         if reference_resources.particle_radius != settings.particle_radius
         {
-            for mut particle_transform in particle_transforms.iter_mut()
-            {
-                particle_transform.scale = settings.particle_scale();
-            }
+            event_writer.send(SettingsChangedEvent);
         }
     }
 }

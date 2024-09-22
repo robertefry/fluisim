@@ -23,8 +23,8 @@ fn main()
         .add_systems(Startup, setup_camera)
         .add_plugins(Simulation)
         .add_plugins(UiSystem)
+        .add_plugins(SettingsSystem)
         .init_state::<SimStates>()
-        .init_resource::<Settings>()
         .run();
 }
 

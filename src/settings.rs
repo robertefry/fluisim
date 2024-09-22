@@ -3,8 +3,18 @@ use bevy::prelude::*;
 
 use crate::util::*;
 
-#[derive(Copy, Clone, PartialEq)]
-#[derive(Resource)]
+pub(crate) struct SettingsSystem;
+
+impl Plugin for SettingsSystem
+{
+    fn build(&self, app: &mut App)
+    {
+        app.init_resource::<Settings>();
+        app.add_event::<SettingsChangedEvent>();
+    }
+}
+
+#[derive(Resource, Copy, Clone, PartialEq)]
 pub(crate) struct Settings
 {
     pub particle_radius: f32,
@@ -43,3 +53,6 @@ impl Settings
         Vec3::new(scale, scale, scale)
     }
 }
+
+#[derive(Event)]
+pub(crate) struct SettingsChangedEvent;

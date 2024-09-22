@@ -15,7 +15,7 @@ impl Plugin for Simulation
 {
     fn build(&self, app: &mut App)
     {
-        app.configure_sets(Update, Simulation.run_if(in_state(SimStates::Running)));
+        app.add_plugins(ParticleSystem);
 
         app.add_systems(Startup,
             (
@@ -23,6 +23,7 @@ impl Plugin for Simulation
             )
             .in_set(Simulation));
 
+        app.configure_sets(Update, Simulation.run_if(in_state(SimStates::Running)));
         app.add_systems(Update,
             (
                 Simulation::on_gravity,
