@@ -26,8 +26,9 @@ impl ParticleSystem
         mut particle_transforms: Query<&mut Transform, With<Particle>>,
         settings: ResMut<Settings>,
     ){
-        for _ in event_reader.read()
+        if let Some(_) = event_reader.read()
             .filter(|e| matches!(e, SettingsChangedEvent::ParticleRadius))
+            .last()
         {
             for mut particle_transform in particle_transforms.iter_mut()
             {
