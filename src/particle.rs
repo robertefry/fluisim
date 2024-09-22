@@ -27,6 +27,7 @@ impl ParticleSystem
         settings: ResMut<Settings>,
     ){
         for _ in event_reader.read()
+            .filter(|e| matches!(e, SettingsChangedEvent::ParticleRadius))
         {
             for mut particle_transform in particle_transforms.iter_mut()
             {

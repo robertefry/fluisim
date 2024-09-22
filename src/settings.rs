@@ -54,5 +54,11 @@ impl Settings
     }
 }
 
-#[derive(Event)]
-pub(crate) struct SettingsChangedEvent;
+#[derive(Event, PartialEq)]
+pub(crate) enum SettingsChangedEvent
+{
+    ParticleRadius,
+    BorderDamping,
+    Gravity,
+    ForceMultiplier,
+}
