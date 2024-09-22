@@ -22,8 +22,8 @@ impl UiSystem
     fn redraw(
         mut contexts: EguiContexts,
         mut event_writer: EventWriter<SettingsChangedEvent>,
-        state_reader: Res<State<SimStates>>,
-        mut state_writer: ResMut<NextState<SimStates>>,
+        state_reader: Res<State<SimState>>,
+        mut state_writer: ResMut<NextState<SimState>>,
         mut settings: ResMut<Settings>,
     ){
         let window = egui::Window::new("Settings");
@@ -32,7 +32,7 @@ impl UiSystem
         {
             egui::Grid::new("Particle Settings").show(ui, |ui|
             {
-                if state_reader.get() == &SimStates::Running
+                if state_reader.get() == &SimState::Running
                 {
                     ui.set_enabled(false);
                 }
@@ -88,18 +88,18 @@ impl UiSystem
 
             let button_running = match state_reader.get()
             {
-                SimStates::Configure => ui.button("Start Simulation"),
-                SimStates::Running => ui.button("Pause Simulation"),
-                SimStates::Paused => ui.button("Resume Simulation"),
+                SimState::Configure => ui.button("Start Simulation"),
+                SimState::Running => ui.button("Pause Simulation"),
+                SimState::Paused => ui.button("Resume Simulation"),
             };
 
             if button_running.clicked()
             {
                 match state_reader.get()
                 {
-                    SimStates::Configure => (*state_writer).set(SimStates::Running),
-                    SimStates::Running => (*state_writer).set(SimStates::Paused),
-                    SimStates::Paused => (*state_writer).set(SimStates::Running),
+                    SimState::Configure => (*state_writer).set(SimState::Running),
+                    SimState::Running => (*state_writer).set(SimState::Paused),
+                    SimState::Paused => (*state_writer).set(SimState::Running),
                 }
             }
         });

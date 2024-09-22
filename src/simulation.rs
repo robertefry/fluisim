@@ -8,7 +8,6 @@ use crate::settings::*;
 use crate::state::*;
 use crate::particle::*;
 
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct Simulation;
 
 impl Plugin for Simulation
@@ -17,13 +16,9 @@ impl Plugin for Simulation
     {
         app.add_plugins(ParticleSystem);
 
-        app.add_systems(Startup,
-            (
-                Simulation::setup,
-            )
-            .in_set(Simulation));
+        app.add_systems(Startup, Simulation::setup);
 
-        app.configure_sets(Update, Simulation.run_if(in_state(SimStates::Running)));
+        app.configure_sets(Update, SimState::Running.run_if(in_state(SimState::Running)));
         app.add_systems(Update,
             (
                 Simulation::on_gravity,
@@ -31,7 +26,7 @@ impl Plugin for Simulation
                 Simulation::confine_to_window,
             )
             .chain()
-            .in_set(Simulation));
+            .in_set(SimState::Running));
     }
 }
 

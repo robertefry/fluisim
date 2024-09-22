@@ -24,7 +24,7 @@ fn main()
         .add_plugins(Simulation)
         .add_plugins(UiSystem)
         .add_plugins(SettingsSystem)
-        .init_state::<SimStates>()
+        .init_state::<SimState>()
         .run();
 }
 
