@@ -20,7 +20,7 @@ impl Plugin for Simulation
         app.configure_sets(Update, SimState::Configure.run_if(in_state(SimState::Configure)));
         app.add_systems(Update,
             (
-                Simulation::on_particle_count_changed,
+                Simulation::on_particle_setup_changed,
             )
             .in_set(SimState::Configure));
 
@@ -119,7 +119,7 @@ impl Simulation
         }
     }
 
-    fn on_particle_count_changed(
+    fn on_particle_setup_changed(
         mut commands: Commands,
         particles: Query<Entity, With<Particle>>,
         particle_resources: Res<ParticleResources>,
@@ -127,7 +127,7 @@ impl Simulation
         settings: Res<Settings>,
     ){
         if let Some(_) = event_reader.read()
-            .filter(|e| matches!(e, SettingsChangedEvent::ParticleCount))
+            .filter(|e| matches!(e, SettingsChangedEvent::ParticleSetup))
             .last()
         {
             for entity in particles.iter()
@@ -135,19 +135,22 @@ impl Simulation
                 commands.entity(entity).despawn_recursive();
             }
 
-            for i in 0..settings.particle_count
-            {
-                // todo: spawn particles in a grid
-                let shift = (i as f32) * 2.0 * settings.particle_radius + 2.0;
-                let transform = Transform::from_scale(settings.particle_scale())
-                    .with_translation(Vec3::new(shift, 0.0, 0.0));
+            for (i,j) in itertools::iproduct!(
+                0..settings.particle_count.y,
+                0..settings.particle_count.x,
+            ){
+                let grid_size = settings.grid_size();
+                let offset = settings.grid_offsets();
+                let x = (i as f32) * grid_size + offset.y;
+                let y = (j as f32) * grid_size + offset.x;
 
                 commands.spawn((
                     MaterialMesh2dBundle
                     {
                         mesh: particle_resources.mesh.clone().into(),
                         material: particle_resources.material.clone(),
-                        transform,
+                        transform: Transform::from_scale(settings.particle_scale())
+                            .with_translation(Vec2::new(x,y).extend(0.0)),
                         ..default()
                     },
                     Particle

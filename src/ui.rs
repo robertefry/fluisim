@@ -37,16 +37,42 @@ impl UiSystem
                     ui.set_enabled(false);
                 }
 
-                ui.label("Particle Count:");
-                let slider_particle_count = egui::DragValue::new(
-                    &mut settings.particle_count)
-                    .clamp_range(Settings::PARTICLE_COUNT.into())
+                // todo: disable particle setup if not in config state
+
+                ui.label("Particle Rows:");
+                let slider_particle_count_rows = egui::DragValue::new(
+                    &mut settings.particle_count.y)
+                    .clamp_range(Settings::PARTICLE_COUNT_ROWS.into())
                     .ui(ui);
                 ui.end_row();
 
-                if slider_particle_count.changed()
+                if slider_particle_count_rows.changed()
                 {
-                    event_writer.send(SettingsChangedEvent::ParticleCount);
+                    event_writer.send(SettingsChangedEvent::ParticleSetup);
+                }
+
+                ui.label("Particle Cols:");
+                let slider_particle_count_cols = egui::DragValue::new(
+                    &mut settings.particle_count.x)
+                    .clamp_range(Settings::PARTICLE_COUNT_COLS.into())
+                    .ui(ui);
+                ui.end_row();
+
+                if slider_particle_count_cols.changed()
+                {
+                    event_writer.send(SettingsChangedEvent::ParticleSetup);
+                }
+
+                ui.label("Particle Sep:");
+                let slider_particle_sep = egui::Slider::new(
+                    &mut settings.particle_sep,
+                    Settings::PARTICLE_SEP.into())
+                    .ui(ui);
+                ui.end_row();
+
+                if slider_particle_sep.changed()
+                {
+                    event_writer.send(SettingsChangedEvent::ParticleSetup);
                 }
 
                 ui.label("Particle Radius:");
