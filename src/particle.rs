@@ -48,6 +48,7 @@ impl Plugin for ParticleSystem
             .in_set(ParticleSystemSet));
 
         app.add_systems(Update, ParticleSystem::on_settings_changed
+            .run_if(on_event::<SettingsChangedEvent>())
             .in_set(ParticleSystemSet));
     }
 }
