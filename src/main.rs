@@ -13,18 +13,18 @@ mod particle;
 
 use ui::*;
 use settings::*;
-use state::*;
 use simulation::*;
+use particle::*;
 
 fn main()
 {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup_camera)
-        .add_plugins(Simulation)
+        .add_plugins(ParticleSystem)
         .add_plugins(UiSystem)
         .add_plugins(SettingsSystem)
-        .init_state::<SimState>()
+        .add_plugins(Simulation)
         .run();
 }
 

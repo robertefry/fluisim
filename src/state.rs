@@ -1,7 +1,7 @@
 
 use bevy::prelude::*;
 
-#[derive(SystemSet, States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum SimState
 {
     #[default] Configure,

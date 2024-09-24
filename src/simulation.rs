@@ -13,18 +13,23 @@ impl Plugin for Simulation
 {
     fn build(&self, app: &mut App)
     {
-        app.add_plugins(ParticleSystem);
+        app.init_state::<SimState>();
 
-        app.add_systems(Startup, Simulation::spawn_initial_particles.after(ParticleSystemSet));
+        app.add_systems(Startup,
+            Simulation::respawn_particle_grid
+            .after(ParticleSystem)
+            );
 
-        app.configure_sets(Update, SimState::Configure.run_if(in_state(SimState::Configure)));
+        app.add_systems(OnEnter(SimState::Configure),
+            Simulation::respawn_particle_grid
+            );
+
         app.add_systems(Update,
-            (
-                Simulation::on_particle_setup_changed,
-            )
-            .in_set(SimState::Configure));
+            Simulation::respawn_particle_grid
+            .run_if(on_event::<SettingsChangedEvent>())
+            .run_if(in_state(SimState::Configure))
+            );
 
-        app.configure_sets(Update, SimState::Running.run_if(in_state(SimState::Running)));
         app.add_systems(Update,
             (
                 Simulation::on_gravity,
@@ -32,30 +37,48 @@ impl Plugin for Simulation
                 Simulation::confine_to_window,
             )
             .chain()
-            .in_set(SimState::Running));
+            .run_if(in_state(SimState::Running))
+            );
     }
 }
 
 impl Simulation
 {
-    fn spawn_initial_particles(
+    fn respawn_particle_grid(
         mut commands: Commands,
+        particles: Query<Entity, With<Particle>>,
         particle_resources: Res<ParticleResources>,
         settings: Res<Settings>,
     ){
-        commands.spawn((
-            MaterialMesh2dBundle
-            {
-                mesh: particle_resources.mesh.clone().into(),
-                material: particle_resources.material.clone(),
-                transform: Transform::from_scale(settings.particle_scale()),
-                ..default()
-            },
-            Particle
-            {
-                velocity: Vec2::new(0.0, 0.0),
-            },
-        ));
+        for particle in particles.iter()
+        {
+            commands.entity(particle).despawn_recursive();
+        }
+
+        for (i,j) in itertools::iproduct!(
+            0..settings.particle_count.y,
+            0..settings.particle_count.x,
+        ){
+            let grid_size = settings.grid_size();
+            let offset = settings.grid_offsets();
+            let x = (i as f32) * grid_size + offset.y;
+            let y = (j as f32) * grid_size + offset.x;
+
+            commands.spawn((
+                MaterialMesh2dBundle
+                {
+                    mesh: particle_resources.mesh.clone().into(),
+                    material: particle_resources.material.clone(),
+                    transform: Transform::from_scale(settings.particle_scale())
+                        .with_translation(Vec2::new(x,y).extend(0.0)),
+                    ..default()
+                },
+                Particle
+                {
+                    velocity: Vec2::new(0.0, 0.0),
+                },
+            ));
+        }
     }
 
     fn movement(
@@ -116,49 +139,6 @@ impl Simulation
         for mut particle in particles.iter_mut()
         {
             particle.velocity += gravity_vector * time.delta_seconds();
-        }
-    }
-
-    fn on_particle_setup_changed(
-        mut commands: Commands,
-        particles: Query<Entity, With<Particle>>,
-        particle_resources: Res<ParticleResources>,
-        mut event_reader: EventReader<SettingsChangedEvent>,
-        settings: Res<Settings>,
-    ){
-        if let Some(_) = event_reader.read()
-            .filter(|e| matches!(e, SettingsChangedEvent::ParticleSetup))
-            .last()
-        {
-            for entity in particles.iter()
-            {
-                commands.entity(entity).despawn_recursive();
-            }
-
-            for (i,j) in itertools::iproduct!(
-                0..settings.particle_count.y,
-                0..settings.particle_count.x,
-            ){
-                let grid_size = settings.grid_size();
-                let offset = settings.grid_offsets();
-                let x = (i as f32) * grid_size + offset.y;
-                let y = (j as f32) * grid_size + offset.x;
-
-                commands.spawn((
-                    MaterialMesh2dBundle
-                    {
-                        mesh: particle_resources.mesh.clone().into(),
-                        material: particle_resources.material.clone(),
-                        transform: Transform::from_scale(settings.particle_scale())
-                            .with_translation(Vec2::new(x,y).extend(0.0)),
-                        ..default()
-                    },
-                    Particle
-                    {
-                        velocity: Vec2::new(0.0, 0.0),
-                    },
-                ));
-            }
         }
     }
 }

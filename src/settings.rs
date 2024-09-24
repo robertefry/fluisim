@@ -81,8 +81,9 @@ impl Settings
 #[derive(Event, PartialEq)]
 pub(crate) enum SettingsChangedEvent
 {
-    ParticleSetup,
+    ParticleCount,
     ParticleRadius,
+    ParticleSeparation,
     BorderDamping,
     Gravity,
     ForceMultiplier,

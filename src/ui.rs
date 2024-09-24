@@ -30,56 +30,57 @@ impl UiSystem
 
         window.show(contexts.ctx_mut(), |ui|
         {
-            egui::Grid::new("Particle Settings").show(ui, |ui|
+            egui::Grid::new("Simulation Settings").show(ui, |ui|
             {
-                if state_reader.get() == &SimState::Running
-                {
-                    ui.set_enabled(false);
-                }
-
-                // todo: disable particle setup if not in config state
-
                 ui.label("Particle Rows:");
-                let slider_particle_count_rows = egui::DragValue::new(
-                    &mut settings.particle_count.y)
-                    .clamp_range(Settings::PARTICLE_COUNT_ROWS.into())
-                    .ui(ui);
+                let slider_particle_count_rows = ui.add_enabled(
+                    matches!(state_reader.get(), SimState::Configure),
+                    egui::DragValue::new(
+                        &mut settings.particle_count.y)
+                        .clamp_range(Settings::PARTICLE_COUNT_ROWS.into())
+                    );
                 ui.end_row();
 
                 if slider_particle_count_rows.changed()
                 {
-                    event_writer.send(SettingsChangedEvent::ParticleSetup);
+                    event_writer.send(SettingsChangedEvent::ParticleCount);
                 }
 
                 ui.label("Particle Cols:");
-                let slider_particle_count_cols = egui::DragValue::new(
-                    &mut settings.particle_count.x)
-                    .clamp_range(Settings::PARTICLE_COUNT_COLS.into())
-                    .ui(ui);
+                let slider_particle_count_cols = ui.add_enabled(
+                    matches!(state_reader.get(), SimState::Configure),
+                    egui::DragValue::new(
+                        &mut settings.particle_count.x)
+                        .clamp_range(Settings::PARTICLE_COUNT_COLS.into())
+                    );
                 ui.end_row();
 
                 if slider_particle_count_cols.changed()
                 {
-                    event_writer.send(SettingsChangedEvent::ParticleSetup);
+                    event_writer.send(SettingsChangedEvent::ParticleCount);
                 }
 
                 ui.label("Particle Sep:");
-                let slider_particle_sep = egui::Slider::new(
-                    &mut settings.particle_sep,
-                    Settings::PARTICLE_SEP.into())
-                    .ui(ui);
+                let slider_particle_sep = ui.add_enabled(
+                    matches!(state_reader.get(), SimState::Configure),
+                    egui::Slider::new(
+                        &mut settings.particle_sep,
+                        Settings::PARTICLE_SEP.into())
+                    );
                 ui.end_row();
 
                 if slider_particle_sep.changed()
                 {
-                    event_writer.send(SettingsChangedEvent::ParticleSetup);
+                    event_writer.send(SettingsChangedEvent::ParticleSeparation);
                 }
 
                 ui.label("Particle Radius:");
-                let slider_particle_radius = egui::Slider::new(
-                    &mut settings.particle_radius,
-                    Settings::PARTICLE_RADIUS.into())
-                    .ui(ui);
+                let slider_particle_radius = ui.add_enabled(
+                    matches!(state_reader.get(), SimState::Configure),
+                    egui::Slider::new(
+                        &mut settings.particle_radius,
+                        Settings::PARTICLE_RADIUS.into())
+                    );
                 ui.end_row();
 
                 if slider_particle_radius.changed()
@@ -124,22 +125,35 @@ impl UiSystem
                 }
             });
 
-            let button_running = match state_reader.get()
+            ui.horizontal(|ui|
             {
-                SimState::Configure => ui.button("Start Simulation"),
-                SimState::Running => ui.button("Pause Simulation"),
-                SimState::Paused => ui.button("Resume Simulation"),
-            };
-
-            if button_running.clicked()
-            {
-                match state_reader.get()
+                let button_running = match state_reader.get()
                 {
-                    SimState::Configure => (*state_writer).set(SimState::Running),
-                    SimState::Running => (*state_writer).set(SimState::Paused),
-                    SimState::Paused => (*state_writer).set(SimState::Running),
+                    SimState::Configure => ui.button("Start"),
+                    SimState::Running => ui.button("Pause"),
+                    SimState::Paused => ui.button("Resume"),
+                };
+
+                if button_running.clicked()
+                {
+                    match state_reader.get()
+                    {
+                        SimState::Configure => (*state_writer).set(SimState::Running),
+                        SimState::Running => (*state_writer).set(SimState::Paused),
+                        SimState::Paused => (*state_writer).set(SimState::Running),
+                    }
                 }
-            }
+
+                let button_reconfigure = ui.add_enabled_ui(
+                    !matches!(state_reader.get(), SimState::Configure),
+                    |ui| ui.button("Reset")
+                ).inner;
+
+                if button_reconfigure.clicked()
+                {
+                    (*state_writer).set(SimState::Configure);
+                }
+            });
         });
     }
 }

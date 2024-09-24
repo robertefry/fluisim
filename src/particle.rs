@@ -36,8 +36,6 @@ impl ParticleResources
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub(crate) struct ParticleSystemSet;
-
 pub(crate) struct ParticleSystem;
 
 impl Plugin for ParticleSystem
@@ -45,17 +43,19 @@ impl Plugin for ParticleSystem
     fn build(&self, app: &mut App)
     {
         app.add_systems(Startup, ParticleResources::setup
-            .in_set(ParticleSystemSet));
+            .in_set(ParticleSystem)
+            );
 
-        app.add_systems(Update, ParticleSystem::on_settings_changed
+        app.add_systems(Update, ParticleSystem::on_particle_radius_changed
+            .in_set(ParticleSystem)
             .run_if(on_event::<SettingsChangedEvent>())
-            .in_set(ParticleSystemSet));
+            );
     }
 }
 
 impl ParticleSystem
 {
-    fn on_settings_changed(
+    fn on_particle_radius_changed(
         mut event_reader: EventReader<SettingsChangedEvent>,
         mut particle_transforms: Query<&mut Transform, With<Particle>>,
         settings: ResMut<Settings>,
