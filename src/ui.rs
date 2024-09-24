@@ -32,33 +32,34 @@ impl UiSystem
         {
             egui::Grid::new("Simulation Settings").show(ui, |ui|
             {
-                ui.label("Particle Rows:");
-                let slider_particle_count_rows = ui.add_enabled(
+                ui.label("Particle Count:");
+                ui.add_enabled_ui(
                     matches!(state_reader.get(), SimState::Configure),
-                    egui::DragValue::new(
-                        &mut settings.particle_count.y)
-                        .clamp_range(Settings::PARTICLE_COUNT_ROWS.into())
-                    );
+                    |ui| ui.horizontal(|ui|
+                    {
+                        ui.label("X:");
+                        let slider_particle_count_cols = egui::DragValue::new(
+                            &mut settings.particle_count.x)
+                            .clamp_range(Settings::PARTICLE_COUNT_COLS.into())
+                            .ui(ui);
+
+                        if slider_particle_count_cols.changed()
+                        {
+                            event_writer.send(SettingsChangedEvent::ParticleCount);
+                        }
+
+                        ui.label("Y:");
+                        let slider_particle_count_rows = egui::DragValue::new(
+                            &mut settings.particle_count.y)
+                            .clamp_range(Settings::PARTICLE_COUNT_ROWS.into())
+                            .ui(ui);
+
+                        if slider_particle_count_rows.changed()
+                        {
+                            event_writer.send(SettingsChangedEvent::ParticleCount);
+                        }
+                    }));
                 ui.end_row();
-
-                if slider_particle_count_rows.changed()
-                {
-                    event_writer.send(SettingsChangedEvent::ParticleCount);
-                }
-
-                ui.label("Particle Cols:");
-                let slider_particle_count_cols = ui.add_enabled(
-                    matches!(state_reader.get(), SimState::Configure),
-                    egui::DragValue::new(
-                        &mut settings.particle_count.x)
-                        .clamp_range(Settings::PARTICLE_COUNT_COLS.into())
-                    );
-                ui.end_row();
-
-                if slider_particle_count_cols.changed()
-                {
-                    event_writer.send(SettingsChangedEvent::ParticleCount);
-                }
 
                 ui.label("Particle Sep:");
                 let slider_particle_sep = ui.add_enabled(

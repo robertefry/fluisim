@@ -61,8 +61,8 @@ impl Simulation
         ){
             let grid_size = settings.grid_size();
             let offset = settings.grid_offsets();
-            let x = (i as f32) * grid_size + offset.y;
-            let y = (j as f32) * grid_size + offset.x;
+            let y = (i as f32) * grid_size + offset.y;
+            let x = (j as f32) * grid_size + offset.x;
 
             commands.spawn((
                 MaterialMesh2dBundle
