@@ -1,7 +1,7 @@
 
 use bevy::prelude::*;
 
-use crate::util::*;
+use util::*;
 use crate::settings::*;
 
 #[derive(Component)]
@@ -24,7 +24,8 @@ impl ParticleResources
         mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<ColorMaterial>>,
     ){
-        let particle_mesh: Mesh = Circle::new(Settings::PARTICLE_RADIUS.upper_bound()).into();
+        let particle_radius = *Settings::PARTICLE_RADIUS.upper_value().unwrap();
+        let particle_mesh: Mesh = Circle::new(particle_radius).into();
         let particle_material = ColorMaterial::from(Color::CYAN);
 
         commands.insert_resource(ParticleResources

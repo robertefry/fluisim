@@ -1,7 +1,8 @@
 
 use bevy::{math::U16Vec2, prelude::*};
 
-use crate::util::*;
+use util::*;
+use std::ops::RangeInclusive;
 
 pub(crate) struct SettingsSystem;
 
@@ -27,27 +28,30 @@ pub(crate) struct Settings
 
 impl Settings
 {
-    pub(crate) const PARTICLE_COUNT_ROWS: ClosedInterval<u32> = ClosedInterval::new(1  , 1000  );
-    pub(crate) const PARTICLE_COUNT_COLS: ClosedInterval<u32> = ClosedInterval::new(1  , 1000  );
-    pub(crate) const PARTICLE_RADIUS:     ClosedInterval<f32> = ClosedInterval::new(1.0,  100.0);
-    pub(crate) const PARTICLE_SEP:        ClosedInterval<f32> = ClosedInterval::new(0.0,  100.0);
-    pub(crate) const BORDER_DAMPING:      ClosedInterval<f32> = ClosedInterval::new(0.0,    1.0);
-    pub(crate) const GRAVITY:             ClosedInterval<f32> = ClosedInterval::new(0.0,   20.0);
-    pub(crate) const FORCE_MULTIPLIER:    ClosedInterval<f32> = ClosedInterval::new(0.0,  100.0);
+    pub(crate) const PARTICLE_COUNT_ROWS: RangeInclusive<u16> = 1   ..= 1000  ;
+    pub(crate) const PARTICLE_COUNT_COLS: RangeInclusive<u16> = 1   ..= 1000  ;
+    pub(crate) const PARTICLE_RADIUS:     RangeInclusive<f32> = 1.0 ..=  100.0;
+    pub(crate) const PARTICLE_SEP:        RangeInclusive<f32> = 0.0 ..=  100.0;
+    pub(crate) const BORDER_DAMPING:      RangeInclusive<f32> = 0.0 ..=    1.0;
+    pub(crate) const GRAVITY:             RangeInclusive<f32> = 0.0 ..=   20.0;
+    pub(crate) const FORCE_MULTIPLIER:    RangeInclusive<f32> = 0.0 ..=  100.0;
 }
 
 impl Default for Settings
 {
     fn default() -> Self
     {
+        let rows = *Settings::PARTICLE_COUNT_ROWS.lower_value().unwrap();
+        let cols = *Settings::PARTICLE_COUNT_COLS.lower_value().unwrap();
+
         Self
         {
-            particle_count: U16Vec2::new(1,1),
-            particle_radius: Settings::PARTICLE_RADIUS.denormalise(0.1919191919191919),
-            particle_sep: 0.0,
-            border_damping: Settings::BORDER_DAMPING.lower_bound(),
-            gravity: 9.8,
-            force_multiplier: 32.0,
+            particle_count: U16Vec2::new(rows, cols),
+            particle_radius: Settings::PARTICLE_RADIUS.some_in_range(20.0).unwrap(),
+            particle_sep: *Settings::PARTICLE_SEP.lower_value().unwrap(),
+            border_damping: *Settings::BORDER_DAMPING.lower_value().unwrap(),
+            gravity: Settings::GRAVITY.some_in_range(9.8).unwrap(),
+            force_multiplier: Settings::FORCE_MULTIPLIER.some_in_range(32.0).unwrap(),
         }
     }
 }
@@ -56,7 +60,7 @@ impl Settings
 {
     pub(crate) fn particle_scale(&self) -> Vec3
     {
-        let scale = self.particle_radius / Settings::PARTICLE_RADIUS.upper_bound();
+        let scale = self.particle_radius / Settings::PARTICLE_RADIUS.upper_value().unwrap();
         Vec3::new(scale, scale, scale)
     }
 

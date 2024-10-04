@@ -3,8 +3,6 @@
 
 use bevy::prelude::*;
 
-mod util;
-
 mod ui;
 mod settings;
 mod state;

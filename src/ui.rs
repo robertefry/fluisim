@@ -40,7 +40,7 @@ impl UiSystem
                         ui.label("X:");
                         let slider_particle_count_cols = egui::DragValue::new(
                             &mut settings.particle_count.x)
-                            .clamp_range(Settings::PARTICLE_COUNT_COLS.into())
+                            .clamp_range(Settings::PARTICLE_COUNT_COLS)
                             .ui(ui);
 
                         if slider_particle_count_cols.changed()
@@ -51,7 +51,7 @@ impl UiSystem
                         ui.label("Y:");
                         let slider_particle_count_rows = egui::DragValue::new(
                             &mut settings.particle_count.y)
-                            .clamp_range(Settings::PARTICLE_COUNT_ROWS.into())
+                            .clamp_range(Settings::PARTICLE_COUNT_ROWS)
                             .ui(ui);
 
                         if slider_particle_count_rows.changed()
@@ -66,7 +66,7 @@ impl UiSystem
                     matches!(state_reader.get(), SimState::Configure),
                     egui::Slider::new(
                         &mut settings.particle_sep,
-                        Settings::PARTICLE_SEP.into())
+                        Settings::PARTICLE_SEP)
                     );
                 ui.end_row();
 
@@ -80,7 +80,7 @@ impl UiSystem
                     matches!(state_reader.get(), SimState::Configure),
                     egui::Slider::new(
                         &mut settings.particle_radius,
-                        Settings::PARTICLE_RADIUS.into())
+                        Settings::PARTICLE_RADIUS)
                     );
                 ui.end_row();
 
@@ -92,7 +92,7 @@ impl UiSystem
                 ui.label("Border Damping:");
                 let slider_border_damping = egui::Slider::new(
                     &mut settings.border_damping,
-                    Settings::BORDER_DAMPING.into())
+                    Settings::BORDER_DAMPING)
                     .ui(ui);
                 ui.end_row();
 
@@ -104,7 +104,7 @@ impl UiSystem
                 ui.label("Gravity:");
                 let slider_gravity = egui::Slider::new(
                     &mut settings.gravity,
-                    Settings::GRAVITY.into())
+                    Settings::GRAVITY)
                     .ui(ui);
                 ui.end_row();
 
@@ -116,7 +116,7 @@ impl UiSystem
                 ui.label("Force Multiplier:");
                 let slider_force_multiplier = egui::Slider::new(
                     &mut settings.force_multiplier,
-                    Settings::FORCE_MULTIPLIER.into())
+                    Settings::FORCE_MULTIPLIER)
                     .ui(ui);
                 ui.end_row();
 
