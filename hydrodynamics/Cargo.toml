@@ -5,3 +5,5 @@ edition = "2021"
 publish = ["none"]
 
 [dependencies]
+peroxide = "0.37.9"
+util = { path = "../util" }

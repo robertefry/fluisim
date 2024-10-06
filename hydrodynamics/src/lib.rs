@@ -1,6 +1,8 @@
 
 mod kernel;
-mod smoothing;
-
 pub use kernel::*;
-pub use smoothing::*;
+
+pub mod kernels;
+
+mod influence;
+pub use influence::*;
