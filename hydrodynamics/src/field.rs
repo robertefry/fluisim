@@ -1,10 +1,11 @@
 
 use crate::FieldKernel;
 
-/// A uniform-mass field comprising a collection of objects in N-dimensional space.
+/// A uniform-mass field comprising a collection of objects in N-dimensional
+/// space.
 ///
-/// This struct implements a field where objects (contributors) are distributed
-/// uniformly and their influence is determined by a field kernel.
+/// This struct implements a field where objects are distributed uniformly and
+/// their influence is determined by a field kernel.
 ///
 /// ## Type Parameters
 ///
@@ -13,8 +14,8 @@ use crate::FieldKernel;
 ///
 /// ## Fields
 ///
-/// * `kernel`          - The field kernel used to calculate the influence of objects.
-/// * `contributors`    - A vector of objects, and their respective field data.
+/// * `kernel`          - The field kernel.
+/// * `contributors`    - A vector of objects, and their field data.
 ///
 pub struct UniformField<const N: usize, T>
 {
@@ -127,8 +128,8 @@ impl<const N: usize, T> UniformField<N,T>
 ///
 /// ## Fields
 ///
-/// * `kernel`          - The field kernel used to calculate the influence of objects.
-/// * `contributors`    - A vector of contributors, and their respective field data.
+/// * `kernel`          - The field kernel.
+/// * `contributors`    - The vector of contributors.
 ///
 pub struct UniformQuantityField<const N: usize>
 {

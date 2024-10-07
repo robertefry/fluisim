@@ -2,6 +2,9 @@
 use peroxide::fuga;
 use std::rc::Rc;
 
+/// Represents a symmetric smoothing kernel used in smoothed particle
+/// hydrodynamic simulations.
+///
 pub trait SymmetricKernel
 {
     /// Defines the radius of support for the smoothing kernel for which a
@@ -20,6 +23,12 @@ pub trait SymmetricKernel
     fn kernel(&self, r: f64) -> f64;
 }
 
+/// Represents a normalised field kernel used in smoothed particle hydrodynamic
+/// simulations.
+///
+/// This struct encapsulates a symmetric kernel and provides methods to
+/// calculate the influence of particles on property fields.
+///
 #[derive(Clone)]
 pub struct FieldKernel
 {
@@ -29,7 +38,7 @@ pub struct FieldKernel
 
 impl FieldKernel
 {
-    /// Creates a new `SmoothingInfluence` instance with the specified parameters.
+    /// Creates a new `FieldKernel` instance with the specified parameters.
     ///
     /// * `n`       - The dimensionality of the space (e.g., 2 for 2D, 3 for 3D).
     /// * `steps`   - The number of discretization steps for the smoothing kernel.
@@ -49,6 +58,9 @@ impl FieldKernel
         }
     }
 
+    /// Defines the radius of support for the smoothing kernel for which a
+    /// property field can be meaningfully calculated.
+    ///
     pub fn support_radius(&self) -> f64
     {
         self.kernel.support_radius()

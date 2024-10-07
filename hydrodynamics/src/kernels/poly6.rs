@@ -1,8 +1,6 @@
 
 use crate::SymmetricKernel;
 
-/// TODO Document
-///
 pub struct Poly6
 {
     support_radius: f64,
@@ -14,6 +12,7 @@ impl SymmetricKernel for Poly6
     {
         self.support_radius
     }
+
     fn kernel(&self, r: f64) -> f64
     {
         (1.0 - r.powi(2)).powi(3)
