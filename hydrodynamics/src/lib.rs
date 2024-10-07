@@ -4,5 +4,5 @@ pub use kernel::*;
 
 pub mod kernels;
 
-mod influence;
-pub use influence::*;
+mod field;
+pub use field::*;

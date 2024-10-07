@@ -1,5 +1,5 @@
 
-use crate::FieldKernel;
+use crate::SymmetricKernel;
 
 /// TODO Document
 ///
@@ -8,7 +8,7 @@ pub struct MullerViscous
     support_radius: f64,
 }
 
-impl FieldKernel for MullerViscous
+impl SymmetricKernel for MullerViscous
 {
     fn support_radius(&self) -> f64
     {

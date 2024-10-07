@@ -1,5 +1,5 @@
 
-use crate::FieldKernel;
+use crate::SymmetricKernel;
 
 /// TODO Document
 ///
@@ -8,7 +8,7 @@ pub struct DebrunSpiky
     support_radius: f64,
 }
 
-impl FieldKernel for DebrunSpiky
+impl SymmetricKernel for DebrunSpiky
 {
     fn support_radius(&self) -> f64
     {
