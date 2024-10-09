@@ -1,19 +1,11 @@
 
-use crate::SymmetricKernel;
+use crate::Kernel;
 
-pub struct MullerViscous
+pub struct MullerViscous;
+
+impl Kernel for MullerViscous
 {
-    support_radius: f64,
-}
-
-impl SymmetricKernel for MullerViscous
-{
-    fn support_radius(&self) -> f64
-    {
-        self.support_radius
-    }
-
-    fn kernel(&self, _r: f64) -> f64
+    fn kernel(&self, _h: f64, _r: f64) -> f64
     {
         todo!("Implement the MullerViscous kernel");
     }

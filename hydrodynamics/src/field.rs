@@ -19,7 +19,7 @@ use crate::FieldKernel;
 ///
 pub struct UniformField<const N: usize, T>
 {
-    kernel: FieldKernel,
+    kernel: FieldKernel<N>,
     contributors: Vec<([f32;N],T)>, // (position, object)
 }
 
@@ -27,7 +27,7 @@ impl<const N: usize, T> UniformField<N,T>
 {
     /// Create a new uniform-mass field.
     ///
-    pub fn new(kernel: FieldKernel) -> Self
+    pub fn new(kernel: FieldKernel<N>) -> Self
     {
         Self {
             kernel,
@@ -133,7 +133,7 @@ impl<const N: usize, T> UniformField<N,T>
 ///
 pub struct UniformQuantityField<const N: usize>
 {
-    kernel: FieldKernel,
+    kernel: FieldKernel<N>,
     contributors: Vec<([f32;N],f64,f64)>, // (position, density, quantity)
 }
 
