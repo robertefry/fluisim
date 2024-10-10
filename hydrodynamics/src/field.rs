@@ -1,6 +1,8 @@
 
 use crate::FieldKernel;
 
+type FieldPos<const N: usize> = nalgebra::SVector<f32,N>;
+
 /// A uniform-mass field comprising a collection of objects in N-dimensional
 /// space.
 ///
@@ -20,7 +22,7 @@ use crate::FieldKernel;
 pub struct UniformField<const N: usize, T>
 {
     kernel: FieldKernel<N>,
-    contributors: Vec<([f32;N],T)>, // (position, object)
+    contributors: Vec<(FieldPos<N>,T)>, // (position, object)
 }
 
 impl<const N: usize, T> UniformField<N,T>
@@ -37,7 +39,7 @@ impl<const N: usize, T> UniformField<N,T>
 
     /// Contribute an object to the field.
     ///
-    pub fn contribute(&mut self, position: [f32;N], object: T)
+    pub fn contribute(&mut self, position: FieldPos<N>, object: T)
     {
         self.contributors.push(( position, object ));
     }
@@ -45,7 +47,7 @@ impl<const N: usize, T> UniformField<N,T>
     /// Interpolate and evaluate the density at a position based on the
     /// positions of nearby equal-mass particles.
     ///
-    pub fn density(&self, position: &[f32;N]) -> f64
+    pub fn density(&self, position: &FieldPos<N>) -> f64
     {
         self.contributors.iter()
 
@@ -53,7 +55,7 @@ impl<const N: usize, T> UniformField<N,T>
             //
             .map(|(position_other, _object)|
             {
-                let radius = util::euclidean::distance(&position, position_other);
+                let radius = (position - position_other).map(f64::from).norm();
                 radius
             })
 
@@ -107,7 +109,7 @@ impl<const N: usize, T> UniformField<N,T>
 
             // Collect the quantity field contributors into a vector.
             //
-            .collect::<Vec<([f32;N],f64,f64)>>();
+            .collect::<Vec<(FieldPos<N>,f64,f64)>>();
 
         UniformQuantityField {
             kernel: self.kernel.clone(),
@@ -133,7 +135,7 @@ impl<const N: usize, T> UniformField<N,T>
 pub struct UniformQuantityField<const N: usize>
 {
     kernel: FieldKernel<N>,
-    contributors: Vec<([f32;N],f64,f64)>, // (position, density, quantity)
+    contributors: Vec<(FieldPos<N>,f64,f64)>, // (position, density, quantity)
 }
 
 impl<const N: usize> UniformQuantityField<N>
@@ -141,7 +143,7 @@ impl<const N: usize> UniformQuantityField<N>
     /// Interpolate a quantity of the field at the desired position based on the
     /// quantities of all nearby particles.
     ///
-    pub fn at(&self, position: [f32;N]) -> f64
+    pub fn at(&self, position: FieldPos<N>) -> f64
     {
         self.contributors.iter()
 
@@ -149,7 +151,7 @@ impl<const N: usize> UniformQuantityField<N>
             //
             .map(|(position_other, density, quantity)|
             {
-                let radius = util::euclidean::distance(&position, position_other);
+                let radius = (position - position_other).map(f64::from).norm();
                 (radius, density, quantity)
             })
 
