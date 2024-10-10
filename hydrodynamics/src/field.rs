@@ -43,13 +43,13 @@ impl<const N: usize, T> UniformField<N,T>
     }
 
     /// Interpolate and evaluate the density at a position based on the
-    /// positions of nearby equal-mass particles mapped by the field kernel.
+    /// positions of nearby equal-mass particles.
     ///
     pub fn density(&self, position: &[f32;N]) -> f64
     {
         self.contributors.iter()
 
-            // Calculate the distance (radius) from the desired position.
+            // Calculate the euclidean distance from the desired position.
             //
             .map(|(position_other, _object)|
             {
@@ -76,8 +76,7 @@ impl<const N: usize, T> UniformField<N,T>
             .sum()
     }
 
-    /// Interpolate a quantity of the field at a position based on the quantity
-    /// of nearby particles mapped by the field kernel.
+    /// Interpolate a quantity field based on the quantity of all particles.
     ///
     pub fn quantity(&self, to_quantity: impl Fn(&T) -> f64) -> UniformQuantityField<N>
     {
@@ -139,14 +138,14 @@ pub struct UniformQuantityField<const N: usize>
 
 impl<const N: usize> UniformQuantityField<N>
 {
-    /// Evaluate the quantity of the field at the desired position based on the
-    /// interpolated field quantities mapped by the field kernel.
+    /// Interpolate a quantity of the field at the desired position based on the
+    /// quantities of all nearby particles.
     ///
     pub fn at(&self, position: [f32;N]) -> f64
     {
         self.contributors.iter()
 
-            // Calculate the distance (radius) from the desired position.
+            // Calculate the euclidean distance from the desired position.
             //
             .map(|(position_other, density, quantity)|
             {
