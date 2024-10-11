@@ -3,26 +3,22 @@ use crate::FieldKernel;
 
 type FieldPos<const N: usize> = nalgebra::SVector<f32,N>;
 
-/// A uniform-mass field comprising a collection of objects in N-dimensional
-/// space.
-///
-/// This struct implements a field where objects are distributed uniformly and
-/// their influence is determined by a field kernel.
+/// Represents a uniform-mass field of particles in N-dimensional space.
 ///
 /// ## Type Parameters
 ///
 /// * `N` - The number of dimensions in the space.
-/// * `T` - The type of objects contributing to the field.
+/// * `T` - The type of particles contributing to the field.
 ///
 /// ## Fields
 ///
-/// * `kernel`          - The field kernel.
-/// * `contributors`    - A vector of objects, and their field data.
+/// * `kernel`    - The field kernel.
+/// * `particles` - A vector of particles, and their field data.
 ///
 pub struct UniformField<const N: usize, T>
 {
     kernel: FieldKernel<N>,
-    contributors: Vec<(FieldPos<N>,T)>, // (position, object)
+    particles: Vec<(FieldPos<N>,T)>, // (position, particle)
 }
 
 impl<const N: usize, T> UniformField<N,T>
@@ -33,15 +29,15 @@ impl<const N: usize, T> UniformField<N,T>
     {
         Self {
             kernel,
-            contributors: Vec::new(),
+            particles: Vec::new(),
         }
     }
 
-    /// Contribute an object to the field.
+    /// Contribute a particle to the field.
     ///
-    pub fn contribute(&mut self, position: FieldPos<N>, object: T)
+    pub fn contribute(&mut self, position: FieldPos<N>, particle: T)
     {
-        self.contributors.push(( position, object ));
+        self.particles.push(( position, particle ));
     }
 
     /// Interpolate and evaluate the density at a position based on the
@@ -49,24 +45,25 @@ impl<const N: usize, T> UniformField<N,T>
     ///
     pub fn density(&self, position: &FieldPos<N>) -> f64
     {
-        self.contributors.iter()
+        self.particles.iter()
 
             // Calculate the euclidean distance from the desired position.
             //
-            .map(|(position_other, _object)|
+            .map(|(position_other, _particle)|
             {
                 let radius = (position - position_other).map(f64::from).norm();
                 radius
             })
 
-            // Filter only the objects who are within the kernel's support radius.
+            // Filter only the particles who are within the kernel's support
+            // radius.
             //
             .filter(|radius|
             {
                 *radius <= self.kernel.support_radius()
             })
 
-            // Calculate the influence this object has on the density.
+            // Calculate the influence this particle has on the density.
             //
             .map(|radius|
             {
@@ -78,28 +75,22 @@ impl<const N: usize, T> UniformField<N,T>
             .sum()
     }
 
-    /// Interpolate a quantity field based on the quantity of all particles.
+    /// Interpolate a quantity field based on the quantity from all nearby
+    /// particles.
     ///
-    pub fn quantity(&self, to_quantity: impl Fn(&T) -> f64) -> UniformQuantityField<N>
+    pub fn sample(&self, to_quantity: impl Fn(&T) -> f64) -> UniformQuantityField<N>
     {
-        let contributors = self.contributors.iter()
+        let quantities = self.particles.iter()
 
-            // Clone the position of each contributing object.
+            // Sample the quantity from the particle.
             //
-            .map(|(position, object)|
+            .map(|(position, particle)|
             {
-                (position.clone(), object)
-            })
-
-            // Map the objects to their desired quantities.
-            //
-            .map(|(position, object)|
-            {
-                let quantity = to_quantity(object);
+                let quantity = to_quantity(particle);
                 (position, quantity)
             })
 
-            // Calculate the density field for each contributor position.
+            // Sample the density at the position of the particle.
             //
             .map(|(position, quantity)|
             {
@@ -107,21 +98,22 @@ impl<const N: usize, T> UniformField<N,T>
                 (position, density, quantity)
             })
 
-            // Collect the quantity field contributors into a vector.
+            // Collect the samples into a vector.
             //
+            .map(|(position, density, quantity)|
+            {
+                (position.clone(), density, quantity)
+            })
             .collect::<Vec<(FieldPos<N>,f64,f64)>>();
 
         UniformQuantityField {
             kernel: self.kernel.clone(),
-            contributors,
+            quantities,
         }
     }
 }
 
-/// Represents a uniform quantity field in N-dimensional space.
-///
-/// This struct holds information about a field where each point in space
-/// has an associated quantity. The field is defined by a set of contributors.
+/// Represents a uniform-mass field of quantities in N-dimensional space.
 ///
 /// ## Type Parameters
 ///
@@ -129,23 +121,23 @@ impl<const N: usize, T> UniformField<N,T>
 ///
 /// ## Fields
 ///
-/// * `kernel`          - The field kernel.
-/// * `contributors`    - The vector of contributors.
+/// * `kernel`     - The field kernel.
+/// * `quantities` - A vector of quantities, and their field data.
 ///
 pub struct UniformQuantityField<const N: usize>
 {
     kernel: FieldKernel<N>,
-    contributors: Vec<(FieldPos<N>,f64,f64)>, // (position, density, quantity)
+    quantities: Vec<(FieldPos<N>,f64,f64)>, // (position, density, quantity)
 }
 
 impl<const N: usize> UniformQuantityField<N>
 {
-    /// Interpolate a quantity of the field at the desired position based on the
-    /// quantities of all nearby particles.
+    /// Interpolate the quantity of the field at the desired position based on
+    /// the quantities from all nearby samples.
     ///
     pub fn at(&self, position: FieldPos<N>) -> f64
     {
-        self.contributors.iter()
+        self.quantities.iter()
 
             // Calculate the euclidean distance from the desired position.
             //
@@ -155,14 +147,16 @@ impl<const N: usize> UniformQuantityField<N>
                 (radius, density, quantity)
             })
 
-            // Filter only the contributors who are within the kernel's support radius.
+            // Filter only the quantities who are within the kernel's support
+            // radius.
             //
             .filter(|(radius, _density, _quantity)|
             {
                 *radius <= self.kernel.support_radius()
             })
 
-            // Calculate the influence this contributor has on the quantity.
+            // Calculate the influence this sample quantity has on the final
+            // quantity.
             //
             .map(|(radius, density, quantity)|
             {
@@ -170,7 +164,7 @@ impl<const N: usize> UniformQuantityField<N>
                 influence * quantity / density
             })
 
-            // Return the sum of all contributing influences.
+            // Return the sum of all contributing quantity influences.
             .sum()
     }
 }
