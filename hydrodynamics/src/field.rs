@@ -1,4 +1,4 @@
-
+use util::to_array::*;
 use crate::FieldKernel;
 
 type FieldPos<const N: usize> = nalgebra::SVector<f32,N>;
@@ -161,10 +161,102 @@ impl<const N: usize> UniformQuantityField<N>
             .map(|(radius, density, quantity)|
             {
                 let influence = self.kernel.influence(radius);
-                influence * quantity / density
+                quantity * influence / density
             })
 
             // Return the sum of all contributing quantity influences.
             .sum()
+    }
+
+    /// Interpolate the gradient of the field based on quantity from all nearby
+    /// samples.
+    pub fn gradient(&self, delta: f64) -> UniformGradientField<N>
+    {
+        let to_gradient = |position: &FieldPos<N>, quantity: f64|
+        {
+            let to_partial = |i|
+            {
+                let position_offset = FieldPos::from_fn(|k,_|
+                {
+                    if i == k { delta as f32 } else { 0.0 }
+                });
+                let quantity_partial = self.at(position + position_offset);
+
+                (quantity_partial - quantity) / delta
+            };
+
+            std::array::from_fn(to_partial)
+        };
+
+        let gradients = self.quantities.iter()
+
+            // Map the quantity at each position to the gradient of that
+            // quantity.
+            //
+            .map(|(position, density, quantity)|
+            {
+                let gradient = to_gradient(position, *quantity);
+                (position, density, gradient)
+            })
+
+            // Collect the gradients into a vector.
+            //
+            .map(|(position, density, gradient)|
+            {
+                (position.clone(), density.clone(), gradient)
+            })
+            .collect();
+
+        UniformGradientField {
+            kernel: self.kernel.clone(),
+            gradients,
+        }
+    }
+}
+
+pub struct UniformGradientField<const N: usize>
+{
+    kernel: FieldKernel<N>,
+    gradients: Vec<(FieldPos<N>,f64,[f64;N])>, // (position, density, gradient)
+}
+
+impl<const N: usize> UniformGradientField<N>
+{
+    pub fn at(&self, position: FieldPos<N>) -> [f64;N]
+    {
+        self.gradients.iter()
+
+            // Calculate the euclidean distance from the desired position.
+            //
+            .map(|(position_other, density, gradient)|
+            {
+                let radius = (position - position_other).map(f64::from).norm();
+                (radius, density, gradient)
+            })
+
+            // Filter only the gradients who are within the kernel's support
+            // radius.
+            //
+            .filter(|(radius, _density, _gradient)|
+            {
+                *radius <= self.kernel.support_radius()
+            })
+
+            // Calculate the influence this sample gradients has on the final
+            // gradient.
+            //
+            .map(|(radius, density, gradient)|
+            {
+                let influence = self.kernel.influence(radius);
+                gradient.map(|q| q * influence / density)
+            })
+
+            // Return the sum of all contributing gradients influences.
+            .fold([0.0;N], |sum, grad| unsafe
+            {
+                itertools::izip!(sum, grad)
+                    .map(|(e_sum,e_grad)| e_sum + e_grad)
+                    .to_array()
+            })
     }
 }
