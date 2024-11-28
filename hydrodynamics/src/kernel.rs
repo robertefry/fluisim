@@ -10,11 +10,17 @@ pub trait Kernel
     /// Defines the smoothing kernel used to calculate a property field for all
     /// distances `r` away from a particle.
     ///
-    /// * 'h' - The radius of support for the smoothing kernel.
+    /// # Arguments
+    ///
+    /// * `h` - The radius of support for the smoothing kernel.
     /// * `r` - The distance between particle and field property.
     ///
-    /// To ensure compact support, the kernel should vanish as `r` tends to
-    /// the 'h'.
+    /// # Notes
+    ///
+    /// To be a valid kernel, the kernel function for all `0 <= r <= h` must be;
+    /// * Non-negative: `self.kernel(h, r) >= 0`
+    /// * Symmetric: `self.kernel(h, r) == self.kernel(h, -r)`
+    /// * Compact: `self.kernel(h, 0) == 0`
     ///
     fn kernel(&self, h: f64, r: f64) -> f64;
 }
@@ -41,8 +47,10 @@ impl<const N: usize> FieldKernel<N>
 {
     /// Creates a new `FieldKernel` instance with the specified parameters.
     ///
+    /// # Arguments
+    ///
     /// * `kernel`  - The smoothing kernel function to be used.
-    /// * 'support' - The radius of support for the smoothing kernel.
+    /// * `support` - The radius of support for the smoothing kernel.
     /// * `steps`   - The number of discretization steps for the smoothing kernel.
     ///
     pub fn new<K>(kernel: K, support: f64, steps: usize) -> Self
@@ -62,6 +70,8 @@ impl<const N: usize> FieldKernel<N>
 
     /// Normalise the field kernel by integrating over the radius of support.
     ///
+    /// # Arguments
+    ///
     /// * `support` - The radius of support for the smoothing kernel.
     /// * `steps`   - The number of discretization steps for any numerical methods.
     ///
@@ -79,6 +89,8 @@ impl<const N: usize> FieldKernel<N>
 
     /// Calculates the influence contribution to a property field by a particle
     /// at a distance `r`.
+    ///
+    /// # Arguments
     ///
     /// `r` - The distance to the particle.
     ///
