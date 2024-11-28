@@ -51,13 +51,30 @@ impl<const N: usize> FieldKernel<N>
     {
         let mut field_kernel = Self
         {
-            kernel_support_radius: 0.0,
+            kernel_support_radius: support,
             kernel_normalisation_coefficient: 0.0,
             kernel: Rc::new(kernel),
         };
 
-        field_kernel.integrate(support, steps);
+        field_kernel.normalise(steps);
         field_kernel
+    }
+
+    /// Normalise the field kernel by integrating over the radius of support.
+    ///
+    /// * `support` - The radius of support for the smoothing kernel.
+    /// * `steps`   - The number of discretization steps for any numerical methods.
+    ///
+    fn normalise(&mut self, steps: usize)
+    {
+        let support = self.kernel_support_radius;
+
+        let integrand = |r: f64| self.kernel.kernel(support,r) * util::nball::volume(N as u8,r);
+        let bounds = (0.0, support);
+        let integral = fuga::GaussLegendre(steps);
+        let volume = fuga::integrate(integrand, bounds, integral);
+
+        self.kernel_normalisation_coefficient = 1.0 / volume;
     }
 
     /// Calculates the influence contribution to a property field by a particle
@@ -72,29 +89,6 @@ impl<const N: usize> FieldKernel<N>
         let support = self.kernel_support_radius;
         let normal = self.kernel_normalisation_coefficient;
         self.kernel.kernel(support, r) * normal
-    }
-
-    /// Recalculate the field properties for a given radius of support, using
-    /// the given number of discretization steps.
-    ///
-    /// * `support` - The radius of support for the smoothing kernel.
-    /// * `steps`   - The number of discretization steps for any numerical methods.
-    ///
-    pub fn integrate(&mut self, support: f64, steps: usize)
-    {
-        self.kernel_support_radius = support;
-
-        // Recalculate the normalisation coefficient by numerically integrating
-        // the kernel over the support volume.
-
-        let support = self.kernel_support_radius;
-
-        let integrand = |r: f64| self.kernel.kernel(support,r) * util::nball::volume(N as u8,r);
-        let bounds = (0.0, support);
-        let integral = fuga::GaussLegendre(steps);
-        let volume = fuga::integrate(integrand, bounds, integral);
-
-        self.kernel_normalisation_coefficient = 1.0 / volume;
     }
 
     /// Return the radius of support for the smoothing kernel.
