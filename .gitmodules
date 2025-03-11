@@ -1,0 +1,3 @@
+[submodule "hydrodynamics/whitepaper/CommonLaTeX"]
+	path = hydrodynamics/whitepaper/CommonLaTeX
+	url = https://github.com/robertefry/CommonLaTeX
