@@ -1,0 +1,27 @@
+
+\section{Kernel of Interpolation}
+
+The kernel is used to determine how particles interact with each other, and how physical quantities of a continuous field are interpolated from discrete particle data.
+
+\begin{definition}
+    A \emph{smoothing kernel} is a continuous non-negative compactly-supported function
+    \[ \omega : \mathbb{R}^+ \times \mathbb{R}^+ \mapto \mathbb{R}^+ : (h,r) \mapsto \omega(h,r) \]
+    where $h$ is the radius of support, and $r$ is the distance between influencing particle and field quantity.
+\end{definition}
+
+While a third property, normalisation, is commonly required, we defer this requirement to the derivation of a field kernel.
+
+\begin{definition}
+    A smoothing kernel is normalized if the volume of the kernel over its support is unital.
+    \[ \int_0^h \omega(h,r) \dd{r} = 1 \]
+\end{definition}
+
+\begin{example}
+    The reference example of a smoothing kernel is the ``poly6'' kernel.
+    \[ \polysix(h,r) = \begin{cases}
+        (h^2 - r^2)^3 & \qq{if} 0 \le r \le h \\
+        0 & \qq{otherwise}
+    \end{cases} \]
+\end{example}
+
+The work by \cite{muller03} evaluates this kernel and proposes a new kernel capable of simulating viscosity forces.

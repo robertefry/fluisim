@@ -1,0 +1,28 @@
+
+\section{Sample Field}
+
+A sample field represents a continuous physical quantity that is discretized into a countable set of samples (or particles). Each particle carries physical quantities such as mass, density, pressure, and velocity. The field quantity at any point in space is computed through a weighted sum of neighboring particles within the kernel's support radius. The weights at each displacement is calculated using the field influence function.
+
+\begin{definition}
+    The interpolated field quantity $A$ at a position $\vec{x}$ is given by
+    \begin{equation}
+        A(N,h)(\vec{x}) = \sum_{i \in \mathbb{N}} A_i \frac{m_i}{\rho_i} \Omega(N,h)(\vec{x} - \vec{x}_i)
+    \end{equation}
+    where, in addition to the parameters already discussed, $A_i$ is the quantity of the $i$th particle, $\vec{x}_i$ is the position of the $i$th particle, $m_i$ is the mass of the $i$th particle, and $\rho_i$ is the field density at $\vec{x}_i$.
+\end{definition}
+
+\begin{theorem}
+    We calculate the initial density field by cancellation of density arguments in the field interpolation equation.
+    \begin{equation}
+        \rho(N,h)(\vec{x}) = \sum_{i \in \mathbb{N}} m_i \Omega(N,h)(\vec{x} - \vec{x}_i)
+    \end{equation}
+\end{theorem}
+
+Though the field interpolation method is applicable to all points of the field, we only need to use it at the positions of each particle.
+
+\begin{theorem}
+    We calculate the vector gradient of an interpolated field.
+    \begin{equation}
+        \nabla A(N,h)(\vec{x}) = \sum_{i \in \mathbb{N}} A_i \frac{m_i}{\rho_i} \nabla \Omega(N,h)(\vec{x} - \vec{x}_i)
+    \end{equation}
+\end{theorem}

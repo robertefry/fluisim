@@ -13,6 +13,11 @@
 \titleinline
 \counterwithout{section}{chapter}
 
+\input{symbols.tex}
+
+\bibliography{references}
+\nocite{*}
+
 \title{Fluisim}
 \subtitle{Smoothed Particle Hydrodynamics}
 \author{Robert E. Fry}
@@ -21,5 +26,14 @@
 \begin{document}
 
     \maketitle
+
+    \subinputfrom{section}{introduction.tex}
+    \subinputfrom{section}{kernel.tex}
+    \subinputfrom{section}{field_kernel.tex}
+    \subinputfrom{section}{sample_field.tex}
+    \subinputfrom{section}{numeric_gradient.tex}
+
+    \printbibliography[heading=subbibliography,category=cited]
+    \printbibliography[heading=subbibliography,notcategory=cited,title={Further Reading}]
 
 \end{document}

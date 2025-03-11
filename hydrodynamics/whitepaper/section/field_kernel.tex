@@ -1,0 +1,30 @@
+
+\section{Field Influence Kernel}
+
+For the purposes of making the implementation of smoothing kernels easier, we now define a field influence function. The purpose of a field influence function is to symmetrically rotate and normalise the smoothing kernel over $N$ dimensions of space.
+
+\begin{definition}
+    The volume of an $N$-ball of radius $r$ is calculated as:
+    \[ B(N,r) \coloneq \frac{ \pi^{N / 2} }{ \xf{\Gamma}{ 1 + \frac{N}{2} } } \cdot r^N \]
+\end{definition}
+
+\begin{definition}
+    The volume of the kernel rotated symmetrically through $N$ dimensions of space is calculated as:
+    \[ V(N,h) \coloneq \int_0^h B(N,r) \; \omega(h,r) \; \dd{r} \]
+\end{definition}
+
+\begin{definition}
+    The \emph{field influence function} is an $N$-dimensional rotationally symmetric normalisation of the $1$-dimensional smoothing kernel
+    \begin{equation}
+        \Omega(N,h)(\vec{x}) \coloneq \frac{1}{V(N,h)} \cdot \omega(h,|\vec{x}|)
+    \end{equation}
+    where $\vec{x}$ is the displacement vector.
+\end{definition}
+
+\begin{theorem}
+    We calculate the vector gradient of the influence function
+    \begin{equation}
+        \nabla \Omega(N,h)(\vec{x}) = \frac{\hat{x}}{V(N,h)} \cdot \pdv{r} \omega(h,r)
+    \end{equation}
+    where $r = |\vec{x}|$ is the magnitude of displacement
+\end{theorem}
