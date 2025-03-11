@@ -5,9 +5,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.13.2", features = ["dynamic_linking"] }
-bevy_egui = "0.27.0"
-itertools = "0.13.0"
+bevy = { version = "0.15.3", features = ["dynamic_linking"] }
+bevy_egui = "0.33.0"
+itertools = "0.14.0"
 
 hydrodynamics = { version = "0.1.0", path = "../hydrodynamics" }
 util = { version = "0.1.0", path = "../util" }

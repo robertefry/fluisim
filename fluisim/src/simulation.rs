@@ -1,6 +1,5 @@
 
 use bevy::prelude::*;
-use bevy::sprite::*;
 
 use crate::settings::*;
 use crate::state::*;
@@ -25,7 +24,7 @@ impl Plugin for Simulation
 
         app.add_systems(Update,
             Simulation::respawn_particle_grid
-            .run_if(on_event::<SettingsChangedEvent>())
+            .run_if(on_event::<SettingsChangedEvent>)
             .run_if(in_state(SimState::Configure))
             );
     }
@@ -53,19 +52,23 @@ impl Simulation
             let y = (i as f32) * grid_size + offset.y;
             let x = (j as f32) * grid_size + offset.x;
 
+            let mesh = Mesh2d(particle_resources.mesh.clone().into());
+            let material = MeshMaterial2d(particle_resources.material.clone());
+
+            let transform = Transform::IDENTITY
+                .with_scale(settings.particle_scale())
+                .with_translation(Vec2::new(x,y).extend(0.0))
+                ;
+
+            let particle = Particle {
+                velocity: Vec2::new(0.0, 0.0),
+            };
+
             commands.spawn((
-                MaterialMesh2dBundle
-                {
-                    mesh: particle_resources.mesh.clone().into(),
-                    material: particle_resources.material.clone(),
-                    transform: Transform::from_scale(settings.particle_scale())
-                        .with_translation(Vec2::new(x,y).extend(0.0)),
-                    ..default()
-                },
-                Particle
-                {
-                    velocity: Vec2::new(0.0, 0.0),
-                },
+                mesh,
+                material,
+                transform,
+                particle,
             ));
         }
     }

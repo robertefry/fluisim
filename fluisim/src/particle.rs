@@ -28,7 +28,7 @@ impl ParticleResources
     ){
         let particle_radius = *Settings::PARTICLE_RADIUS.upper_value().unwrap();
         let particle_mesh: Mesh = Circle::new(particle_radius).into();
-        let particle_material = ColorMaterial::from(Color::CYAN);
+        let particle_material = ColorMaterial::from(Color::hsl(180.0, 1.0, 0.5));
 
         commands.insert_resource(ParticleResources
         {
@@ -51,7 +51,7 @@ impl Plugin for ParticleSystem
 
         app.add_systems(Update, ParticleSystem::on_particle_radius_changed
             .in_set(ParticleSystem)
-            .run_if(on_event::<SettingsChangedEvent>())
+            .run_if(on_event::<SettingsChangedEvent>)
             );
 
         app.add_systems(Update,
@@ -90,7 +90,7 @@ impl ParticleSystem
     ){
         for (mut transform, particle) in particles.iter_mut()
         {
-            let delta = particle.velocity * time.delta_seconds();
+            let delta = particle.velocity * time.delta_secs();
             transform.translation += Vec3::new(delta.x, delta.y, 0.0);
         }
     }
@@ -141,7 +141,7 @@ impl ParticleSystem
 
         for mut particle in particles.iter_mut()
         {
-            particle.velocity += gravity_vector * time.delta_seconds();
+            particle.velocity += gravity_vector * time.delta_secs();
         }
     }
 }

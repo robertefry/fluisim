@@ -40,7 +40,7 @@ impl UiSystem
                         ui.label("X:");
                         let slider_particle_count_cols = egui::DragValue::new(
                             &mut settings.particle_count.x)
-                            .clamp_range(Settings::PARTICLE_COUNT_COLS)
+                            .range(Settings::PARTICLE_COUNT_COLS)
                             .ui(ui);
 
                         if slider_particle_count_cols.changed()
@@ -51,7 +51,7 @@ impl UiSystem
                         ui.label("Y:");
                         let slider_particle_count_rows = egui::DragValue::new(
                             &mut settings.particle_count.y)
-                            .clamp_range(Settings::PARTICLE_COUNT_ROWS)
+                            .range(Settings::PARTICLE_COUNT_ROWS)
                             .ui(ui);
 
                         if slider_particle_count_rows.changed()

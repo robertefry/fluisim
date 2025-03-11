@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-itertools = "0.13.0"
-peroxide = "0.37.9"
+itertools = "0.14.0"
+peroxide = "0.39.2"
