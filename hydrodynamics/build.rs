@@ -4,7 +4,14 @@ use std::path::PathBuf;
 
 fn main() {
     let builder = Builder::new();
-    builder.build_whitepaper();
+
+    if let Err(error) = (|| -> Result<(), String> {
+        builder.whitepaper_compile()?;
+        builder.whitepaper_export()?;
+        Ok(())
+    })() {
+        eprintln!("Failed to build the whitepaper: {}", error);
+    }
 }
 
 struct Builder {
@@ -15,6 +22,15 @@ struct Builder {
 
 impl Builder {
 
+    const DOCKER_DIR: &'static str = "/workdir";
+    const DOCKER_OUT: &'static str = "/outdir";
+
+    const TEXLIVE_IMG: &'static str = "texlive/texlive";
+    const TEXLIVE_CMD: &'static str = "pdflatex";
+
+    const WHITEPAPER_IN:  &'static str = "main.tex";
+    const WHITEPAPER_OUT: &'static str = "main.pdf";
+
     fn new() -> Self {
         Self {
             module_name: std::env::var("CARGO_PKG_NAME").unwrap(),
@@ -23,44 +39,56 @@ impl Builder {
         }
     }
 
-    fn build_whitepaper(&self) {
-
-        // Compile the whitepaper.
+    fn whitepaper_compile(&self) -> Result<(), String> {
 
         let whitepaper_dir = self.module_manifest.join("whitepaper");
         let whitepaper_out = self.out_dir.as_path();
 
-        let docker_dir     = "/workdir";
-        let docker_out     = "/outdir";
-
-        let texlive_img    = "texlive/texlive";
-        let texlive_cmd    = "pdflatex";
-        let texlive_in     = "main.tex";
-        let texlive_out    = "main.pdf";
-
         let status = Command::new("docker")
             .arg("run").arg("--rm")
-            .arg("-v").arg(format!("{}:{}", whitepaper_dir.display(), docker_dir))
-            .arg("-v").arg(format!("{}:{}", whitepaper_out.display(), docker_out))
-            .arg("-w").arg(docker_dir)
-            .arg(texlive_img)
-            .arg(texlive_cmd)
-            .arg("-output-directory").arg(docker_out)
-            .arg(texlive_in)
+            .arg("-v").arg(format!("{}:{}", whitepaper_dir.display(), Self::DOCKER_DIR))
+            .arg("-v").arg(format!("{}:{}", whitepaper_out.display(), Self::DOCKER_OUT))
+            .arg("-w").arg(Self::DOCKER_DIR)
+            .arg(Self::TEXLIVE_IMG)
+            .arg(Self::TEXLIVE_CMD)
+            .arg("-output-directory").arg(Self::DOCKER_OUT)
+            .arg(Self::WHITEPAPER_IN)
             .status()
             ;
 
-        match status {
-            Ok(status) if status.success() => { /* noop */ }
-            _ => { panic!("Failed to execute {} in a {} docker container.", texlive_cmd, texlive_img) }
+        fn format_error(error: impl ToString) -> String {
+            format!(
+                "Failed to execute {} in a {} docker container: {}"
+                , Builder::TEXLIVE_CMD
+                , Builder::TEXLIVE_IMG
+                , error.to_string()
+            )
         }
 
-        // Move the whitepaper pdf to the module manifest directory.
+        match status {
+            Ok(status) if status.success() => Ok(()),
+            Ok(error) => Err(format_error(error)),
+            Err(error) => Err(format_error(error)),
+        }
+    }
+
+    fn whitepaper_export(&self) -> Result<(), String> {
 
         let whitepaper_name = format!("{}.pdf", self.module_name);
         let whitepaper_pdf = self.module_manifest.join(whitepaper_name);
 
-        std::fs::rename(self.out_dir.join(texlive_out), &whitepaper_pdf)
-            .expect("Failed to move the generated pdf file.");
+        let status = std::fs::rename(self.out_dir.join(Self::WHITEPAPER_OUT), &whitepaper_pdf);
+
+        fn format_error(error: impl ToString) -> String {
+            format!(
+                "Failed to move the generated pdf file: {}"
+                , error.to_string()
+            )
+        }
+
+        match status {
+            Ok(_) => Ok(()),
+            Err(error) => Err(format_error(error)),
+        }
     }
 }
